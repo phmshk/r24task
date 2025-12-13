@@ -12,8 +12,14 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [plates, setPlates] = useState<Plate[]>([
     {
       id: crypto.randomUUID(),
-      width: MIN_PLATE_WIDTH,
-      height: MIN_PLATE_HEIGHT,
+      width: 100,
+      height: 23,
+      socketGroups: [],
+    },
+    {
+      id: crypto.randomUUID(),
+      width: 35,
+      height: 64,
       socketGroups: [],
     },
   ]);

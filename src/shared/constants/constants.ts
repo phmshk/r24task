@@ -11,3 +11,6 @@ export const MIN_PLATE_HEIGHT = 30; // cm
 export const MAX_PLATE_HEIGHT = 128; // cm
 export const MIN_PLATE_WIDTH_FOR_SOCKET = 40; // cm
 export const MIN_PLATE_HEIGHT_FOR_SOCKET = 40; // cm
+
+//CANVAS
+export const GAP_BETWEEN_PLATES = 0.5;

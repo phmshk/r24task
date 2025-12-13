@@ -9,4 +9,5 @@ export {
   MAX_PLATE_HEIGHT,
   MIN_PLATE_HEIGHT_FOR_SOCKET,
   MIN_PLATE_WIDTH_FOR_SOCKET,
+  GAP_BETWEEN_PLATES,
 } from "./constants.ts";
