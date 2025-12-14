@@ -13,11 +13,9 @@ export function adjustPositionForSVG(
   containerHeight: number,
   distanceX: number,
   distanceY: number,
-  width: number,
-  height: number,
 ): Coordinates {
   return {
-    x: distanceX - width / 2,
-    y: containerHeight - distanceY - height / 2,
+    x: distanceX,
+    y: containerHeight - distanceY,
   };
 }

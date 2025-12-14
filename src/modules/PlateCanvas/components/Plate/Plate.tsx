@@ -19,7 +19,12 @@ export const Plate = (props: IPlate) => {
       viewBox={`0 0 ${plate.width} ${plate.height}`}
     >
       <rect width="100%" height="100%" className="fill-white" />
-      <SocketGroup maxHeight={maxHeight} socketGroup={plate.socketGroups[0]} />
+      <SocketGroup
+        socketGroup={plate.socketGroups[0]}
+        plateId={plate.id}
+        plateWidth={plate.width}
+        plateHeight={plate.height}
+      />
     </svg>
   );
 };
