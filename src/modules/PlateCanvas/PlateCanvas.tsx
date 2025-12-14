@@ -2,9 +2,11 @@ import { useProjectContext } from "@/app/providers";
 import { GAP_BETWEEN_PLATES } from "@/shared/constants";
 import type { Plate } from "@/shared/types";
 import { useMemo } from "react";
+import { Plate as PlateItem } from "./components/Plate/Plate.tsx";
 
 export const PlateCanvas = () => {
   const { plates } = useProjectContext();
+
   const layout = useMemo(() => {
     let totalWidth = 0;
     let maxHeight = 0;
@@ -29,19 +31,18 @@ export const PlateCanvas = () => {
     <svg
       viewBox={`0 0 ${layout.totalWidth} ${layout.maxHeight}`}
       className="max-h-full max-w-full drop-shadow-xl transition-all duration-300 ease-in-out"
+      // guide from https://www.digitalocean.com/community/tutorials/svg-preserve-aspect-ratio
       // preserveAspectRatio will tell our image to scale to fit the viewPort and to be centered
-      //xMidYMid - center the viewBox region within the viewPort region
-      //meet - scale our graphic until it meets the height and width of our viewPort
+      // xMidYMid - center the viewBox region within the viewPort region
+      // meet - scale our graphic until it meets the height and width of our viewPort
       preserveAspectRatio="xMidYMid meet"
     >
       {layout.platesWithXCoordinate.map(({ plate, xPosition }) => (
-        <rect
+        <PlateItem
           key={plate.id}
-          x={xPosition}
-          y={layout.maxHeight - plate.height}
-          width={plate.width}
-          height={plate.height}
-          className="fill-white"
+          plate={plate}
+          xPosition={xPosition}
+          maxHeight={layout.maxHeight}
         />
       ))}
     </svg>
