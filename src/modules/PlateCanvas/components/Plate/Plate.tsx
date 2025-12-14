@@ -1,4 +1,5 @@
 import type { Plate as PlateType } from "@/shared/types";
+import { SocketGroup } from "../SocketGroup/SocketGroup";
 
 interface IPlate {
   plate: PlateType;
@@ -10,13 +11,15 @@ export const Plate = (props: IPlate) => {
   const { plate, xPosition, maxHeight } = props;
 
   return (
-    <rect
-      key={plate.id}
-      x={xPosition}
-      y={maxHeight - plate.height}
+    <svg
       width={plate.width}
       height={plate.height}
-      className="fill-white"
-    />
+      x={xPosition}
+      y={maxHeight - plate.height}
+      viewBox={`0 0 ${plate.width} ${plate.height}`}
+    >
+      <rect width="100%" height="100%" className="fill-white" />
+      <SocketGroup maxHeight={maxHeight} socketGroup={plate.socketGroups[0]} />
+    </svg>
   );
 };
