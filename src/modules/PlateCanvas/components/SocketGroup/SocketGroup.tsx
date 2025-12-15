@@ -26,27 +26,32 @@ export const SocketGroup = (props: ISocketGroup) => {
   const groupHeight =
     socketGroup.orientation === "vertical" ? totalLength : SOCKET_SIZE;
 
-  const { isDragging, startDragging } = useDragNDrop({
-    initialX: socketGroup.x,
-    initialY: socketGroup.y,
-    onGroupDrag: (newX: number, newY: number) => {
-      //clamping handling
-      const clampedX = Math.max(0, Math.min(newX, plateWidth - groupWidth));
-      const clampedY = Math.max(0, Math.min(newY, plateHeight - groupHeight));
-      updateSocketGroup(plateId, socketGroup.id, { x: clampedX, y: clampedY });
-    },
-  });
-
   const anchorPoint = adjustPositionForSVG(
     plateHeight,
     socketGroup.x,
     socketGroup.y,
   );
 
-  const topLeftAnchorSocketCorner = {
+  const bottomLeftAnchorSocketCorner = {
     x: anchorPoint.x - SOCKET_SIZE / 2,
-    y: anchorPoint.y - SOCKET_SIZE / 2,
+    y: anchorPoint.y + SOCKET_SIZE / 2,
   };
+
+  const { isDragging, startDragging } = useDragNDrop({
+    initialX: socketGroup.x,
+    initialY: socketGroup.y,
+    onGroupDrag: (newX: number, newY: number) => {
+      //clamping handling
+      const halfSocket = SOCKET_SIZE / 2;
+      const minX = halfSocket;
+      const minY = halfSocket;
+      const maxX = plateWidth - groupWidth + halfSocket;
+      const maxY = plateHeight - groupHeight + halfSocket;
+      const clampedX = Math.max(minX, Math.min(newX, maxX));
+      const clampedY = Math.max(minY, Math.min(newY, maxY));
+      updateSocketGroup(plateId, socketGroup.id, { x: clampedX, y: clampedY });
+    },
+  });
 
   return (
     <g
@@ -54,30 +59,28 @@ export const SocketGroup = (props: ISocketGroup) => {
       className={`${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
     >
       <rect
-        x={topLeftAnchorSocketCorner.x}
+        x={bottomLeftAnchorSocketCorner.x}
         y={
           socketGroup.orientation === "vertical"
-            ? topLeftAnchorSocketCorner.y - groupHeight + SOCKET_SIZE
-            : topLeftAnchorSocketCorner.y
+            ? bottomLeftAnchorSocketCorner.y - groupHeight
+            : bottomLeftAnchorSocketCorner.y
         }
         width={groupWidth}
         height={groupHeight}
         fill="transparent"
-        stroke="red"
-        strokeWidth="0.1"
       />
       {Array.from({ length: socketGroup.count }).map((_, index) => {
         const moveBy = index * (SOCKET_SIZE + SOCKET_GAP);
 
         const currX =
           socketGroup.orientation === "horizontal"
-            ? anchorPoint.x + moveBy
-            : anchorPoint.x;
+            ? bottomLeftAnchorSocketCorner.x + moveBy
+            : bottomLeftAnchorSocketCorner.x;
 
         const currY =
           socketGroup.orientation === "horizontal"
-            ? anchorPoint.y
-            : anchorPoint.y - moveBy;
+            ? bottomLeftAnchorSocketCorner.y
+            : bottomLeftAnchorSocketCorner.y - moveBy;
 
         return <Socket key={index} x={currX} y={currY - SOCKET_SIZE} />;
       })}
@@ -99,6 +102,12 @@ export const SocketGroup = (props: ISocketGroup) => {
         strokeWidth={0.5}
       />
 
+      <circle
+        cx={bottomLeftAnchorSocketCorner.x}
+        cy={bottomLeftAnchorSocketCorner.y}
+        r={1}
+        fill="yellow"
+      />
       <circle cx={anchorPoint.x} cy={anchorPoint.y} r={1} fill="red" />
     </g>
   );

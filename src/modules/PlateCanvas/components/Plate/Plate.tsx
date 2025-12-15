@@ -17,6 +17,7 @@ export const Plate = (props: IPlate) => {
       x={xPosition}
       y={maxHeight - plate.height}
       viewBox={`0 0 ${plate.width} ${plate.height}`}
+      className="plate"
     >
       <rect width="100%" height="100%" className="fill-white" />
       <SocketGroup
