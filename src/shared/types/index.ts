@@ -1,1 +1,6 @@
-export type { SocketGroup, Plate, Coordinates } from "./types.ts";
+export type {
+  SocketGroup,
+  SocketGroupInfo,
+  Plate,
+  Coordinates,
+} from "./types.ts";

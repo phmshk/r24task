@@ -6,6 +6,14 @@ export interface SocketGroup {
   orientation: "vertical" | "horizontal";
 }
 
+export interface SocketGroupInfo {
+  id: string;
+  width: number;
+  height: number;
+  coordinates: { x1: number; x2: number; y1: number; y2: number };
+  anchorPoint: { x: number; y: number };
+}
+
 export interface Plate {
   id: string;
   width: number; //cm

@@ -20,13 +20,16 @@ export const Plate = (props: IPlate) => {
       className="plate"
     >
       <rect width="100%" height="100%" className="fill-white" />
-      <SocketGroup
-        socketGroup={plate.socketGroups[0]}
-        plateId={plate.id}
-        plateWidth={plate.width}
-        plateHeight={plate.height}
-        allGroups={plate.socketGroups}
-      />
+      {plate.socketGroups.map((item) => (
+        <SocketGroup
+          key={item.id}
+          socketGroup={item}
+          plateId={plate.id}
+          plateWidth={plate.width}
+          plateHeight={plate.height}
+          allGroups={plate.socketGroups}
+        />
+      ))}
     </svg>
   );
 };

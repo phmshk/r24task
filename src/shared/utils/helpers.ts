@@ -1,16 +1,13 @@
-import type { SocketGroup } from "@/shared/types";
+import type { SocketGroup, SocketGroupInfo } from "@/shared/types";
 import { SOCKET_GAP, SOCKET_SIZE } from "../constants";
 
 /** Function to get information about a socket group: full coordinates, group width and length
  * @param group - SocketGroup
  * @returns - object with calculated values
  * */
-export function calculateValuesForSocketGroup(sg: SocketGroup): {
-  width: number;
-  height: number;
-  coordinates: { x1: number; x2: number; y1: number; y2: number };
-  anchorPoint: { x: number; y: number };
-} {
+export function calculateValuesForSocketGroup(
+  sg: SocketGroup,
+): SocketGroupInfo {
   const halfSize = SOCKET_SIZE / 2;
   const totalLength = sg.count * SOCKET_SIZE + (sg.count - 1) * SOCKET_GAP;
 
@@ -24,39 +21,38 @@ export function calculateValuesForSocketGroup(sg: SocketGroup): {
   };
 
   const anchorPoint = { x: sg.x, y: sg.y };
-  return { width, height, coordinates, anchorPoint };
+  return { id: sg.id, width, height, coordinates, anchorPoint };
 }
 
-/** Function to check if two socket groups intersect
- * @param a - first socket group
- * @param b - second socket group
+/** Function to check if two socket groups intersect including gap between them
+ * @param a - first socket group information with coordinate
+ * @param b - second socket group information with coordinates
  * @returns - true if socket groups intersect else false
  * */
-export function checkIntersection(a: SocketGroup, b: SocketGroup): boolean {
-  const cA = {
-    x1: a.x,
-    x2:
-      a.orientation === "vertical"
-        ? a.x + SOCKET_SIZE
-        : a.x + a.count * (SOCKET_SIZE + SOCKET_GAP) - SOCKET_GAP,
-    y1: a.y,
-    y2:
-      a.orientation === "vertical"
-        ? a.y - a.count * (SOCKET_SIZE + SOCKET_GAP) - SOCKET_GAP
-        : a.y + SOCKET_SIZE,
-  };
+export function checkIntersection(
+  a: SocketGroupInfo,
+  b: SocketGroupInfo,
+  margin: number = 0,
+): boolean {
+  const cA = a.coordinates;
+  const cB = b.coordinates;
 
-  const cB = {
-    x1: b.x,
-    x2:
-      b.orientation === "vertical"
-        ? b.x + SOCKET_SIZE
-        : b.x + b.count * (SOCKET_SIZE + SOCKET_GAP) - SOCKET_GAP,
-    y1: b.y,
-    y2:
-      b.orientation === "vertical"
-        ? b.y - b.count * (SOCKET_SIZE + SOCKET_GAP) - SOCKET_GAP
-        : b.y + SOCKET_SIZE,
-  };
-  return !(cA.y1 < cB.y2 || cA.y2 > cB.y1 || cA.x2 < cB.x1 || cA.x1 > cB.x2);
+  // spent too much time mixing coordinates up, which led to bugs
+  // normalizing coordinates
+  const aX1 = Math.min(cA.x1, cA.x2);
+  const aX2 = Math.max(cA.x1, cA.x2);
+  const aY1 = Math.min(cA.y1, cA.y2);
+  const aY2 = Math.max(cA.y1, cA.y2);
+
+  const bX1 = Math.min(cB.x1, cB.x2);
+  const bX2 = Math.max(cB.x1, cB.x2);
+  const bY1 = Math.min(cB.y1, cB.y2);
+  const bY2 = Math.max(cB.y1, cB.y2);
+
+  return (
+    aX1 <= bX2 + margin &&
+    aX2 >= bX1 - margin &&
+    aY1 <= bY2 + margin &&
+    aY2 >= bY1 - margin
+  );
 }

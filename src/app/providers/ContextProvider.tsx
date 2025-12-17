@@ -16,6 +16,13 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
       height: 100,
       socketGroups: [
         {
+          count: 3,
+          id: crypto.randomUUID(),
+          orientation: "horizontal",
+          x: 10,
+          y: 20,
+        },
+        {
           count: 4,
           id: crypto.randomUUID(),
           orientation: "vertical",
