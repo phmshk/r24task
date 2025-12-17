@@ -25,6 +25,7 @@ export const Plate = (props: IPlate) => {
         plateId={plate.id}
         plateWidth={plate.width}
         plateHeight={plate.height}
+        allGroups={plate.socketGroups}
       />
     </svg>
   );

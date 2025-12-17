@@ -1,6 +1,10 @@
-import { SOCKET_GAP, SOCKET_SIZE } from "@/shared/constants";
+import {
+  SOCKET_GAP,
+  SOCKET_MARGIN_FROM_EDGE,
+  SOCKET_SIZE,
+} from "@/shared/constants";
 import type { SocketGroup as SocketGroupType } from "@/shared/types";
-import { adjustPositionForSVG } from "@/shared/utils";
+import { calculateValuesForSocketGroup } from "@/shared/utils";
 import { Socket } from "./../Socket/Socket.tsx";
 import { useDragNDrop } from "../../hooks/useDragNDrop.ts";
 import { useProjectContext } from "@/app/providers/context.ts";
@@ -10,48 +14,38 @@ interface ISocketGroup {
   plateId: string;
   plateHeight: number;
   plateWidth: number;
+  allGroups: SocketGroupType[];
 }
 
 export const SocketGroup = (props: ISocketGroup) => {
-  const { socketGroup, plateId, plateHeight, plateWidth } = props;
+  const { socketGroup, plateId, plateHeight, plateWidth, allGroups } = props;
   const { updateSocketGroup } = useProjectContext();
-
-  const totalGaps = (socketGroup.count - 1) * SOCKET_GAP;
-  const totalSockets = socketGroup.count * SOCKET_SIZE;
-  const totalLength = totalSockets + totalGaps;
-
-  const groupWidth =
-    socketGroup.orientation === "horizontal" ? totalLength : SOCKET_SIZE;
-
-  const groupHeight =
-    socketGroup.orientation === "vertical" ? totalLength : SOCKET_SIZE;
-
-  const anchorPoint = adjustPositionForSVG(
-    plateHeight,
-    socketGroup.x,
-    socketGroup.y,
-  );
-
-  const bottomLeftAnchorSocketCorner = {
-    x: anchorPoint.x - SOCKET_SIZE / 2,
-    y: anchorPoint.y + SOCKET_SIZE / 2,
-  };
-
+  const { width, height, coordinates, anchorPoint } =
+    calculateValuesForSocketGroup(socketGroup);
   const { isDragging, startDragging } = useDragNDrop({
     initialX: socketGroup.x,
     initialY: socketGroup.y,
     onGroupDrag: (newX: number, newY: number) => {
-      //clamping handling
-      const halfSocket = SOCKET_SIZE / 2;
-      const minX = halfSocket;
-      const minY = halfSocket;
-      const maxX = plateWidth - groupWidth + halfSocket;
-      const maxY = plateHeight - groupHeight + halfSocket;
-      const clampedX = Math.max(minX, Math.min(newX, maxX));
-      const clampedY = Math.max(minY, Math.min(newY, maxY));
-      updateSocketGroup(plateId, socketGroup.id, { x: clampedX, y: clampedY });
+      const minX = SOCKET_SIZE / 2;
+      const minY = height - SOCKET_SIZE / 2;
+      const maxX = plateWidth - SOCKET_SIZE / 2;
+      const maxY = plateHeight - SOCKET_SIZE / 2;
+      const clampedX = Math.max(
+        minX + SOCKET_MARGIN_FROM_EDGE,
+        Math.min(newX, maxX - SOCKET_MARGIN_FROM_EDGE),
+      );
+      const clampedY = Math.max(
+        minY + SOCKET_MARGIN_FROM_EDGE,
+        Math.min(newY, maxY - SOCKET_MARGIN_FROM_EDGE),
+      );
+      updateSocketGroup(plateId, socketGroup.id, {
+        x: clampedX,
+        y: clampedY,
+      });
     },
   });
+
+  console.log(anchorPoint);
 
   return (
     <g
@@ -59,14 +53,12 @@ export const SocketGroup = (props: ISocketGroup) => {
       className={`${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
     >
       <rect
-        x={bottomLeftAnchorSocketCorner.x}
-        y={
-          socketGroup.orientation === "vertical"
-            ? bottomLeftAnchorSocketCorner.y - groupHeight
-            : bottomLeftAnchorSocketCorner.y
-        }
-        width={groupWidth}
-        height={groupHeight}
+        x={coordinates.x1}
+        y={coordinates.y2}
+        width={width}
+        height={height}
+        strokeWidth={0.1}
+        stroke="red"
         fill="transparent"
       />
       {Array.from({ length: socketGroup.count }).map((_, index) => {
@@ -74,13 +66,13 @@ export const SocketGroup = (props: ISocketGroup) => {
 
         const currX =
           socketGroup.orientation === "horizontal"
-            ? bottomLeftAnchorSocketCorner.x + moveBy
-            : bottomLeftAnchorSocketCorner.x;
+            ? coordinates.x1 + moveBy
+            : coordinates.x1;
 
         const currY =
           socketGroup.orientation === "horizontal"
-            ? bottomLeftAnchorSocketCorner.y
-            : bottomLeftAnchorSocketCorner.y - moveBy;
+            ? coordinates.y1
+            : coordinates.y1 - moveBy;
 
         return <Socket key={index} x={currX} y={currY - SOCKET_SIZE} />;
       })}
@@ -102,12 +94,7 @@ export const SocketGroup = (props: ISocketGroup) => {
         strokeWidth={0.5}
       />
 
-      <circle
-        cx={bottomLeftAnchorSocketCorner.x}
-        cy={bottomLeftAnchorSocketCorner.y}
-        r={1}
-        fill="yellow"
-      />
+      <circle cx={coordinates.x1} cy={coordinates.y1} r={1} fill="yellow" />
       <circle cx={anchorPoint.x} cy={anchorPoint.y} r={1} fill="red" />
     </g>
   );

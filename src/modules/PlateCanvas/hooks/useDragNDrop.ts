@@ -70,7 +70,7 @@ export const useDragNDrop = ({
 
       // new position in cm
       const newCmX = dragStart.originalX + dCmX;
-      const newCmY = dragStart.originalY - dCmY;
+      const newCmY = dragStart.originalY + dCmY;
 
       onGroupDrag(newCmX, newCmY);
     };
