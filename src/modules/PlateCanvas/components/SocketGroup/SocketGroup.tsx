@@ -128,22 +128,49 @@ export const SocketGroup = (props: ISocketGroup) => {
         return <Socket key={index} x={currX} y={currY - SOCKET_SIZE} />;
       })}
 
-      <line
-        x1={plateWidth / 2}
-        x2={plateWidth / 2}
-        y1={plateHeight}
-        y2={0}
-        stroke="black"
-        strokeWidth={0.5}
-      />
-      <line
-        x1={0}
-        x2={plateWidth}
-        y1={plateHeight / 2}
-        y2={plateHeight / 2}
-        stroke="black"
-        strokeWidth={0.5}
-      />
+      {isDragging && (
+        <g className="pointer-events-none">
+          {/*HORIZONTAL LINE*/}
+          <line
+            x1={currGroup.anchorPoint.x}
+            x2={currGroup.anchorPoint.x}
+            y1={plateHeight}
+            y2={currGroup.anchorPoint.y}
+            stroke="black"
+            strokeDasharray="2"
+            strokeWidth={0.2}
+          />
+          <text
+            x={currGroup.anchorPoint.x / 2}
+            y={currGroup.anchorPoint.y + SOCKET_SIZE / 2}
+            textAnchor="middle"
+            fontSize={3}
+            fill="red"
+          >
+            {currGroup.anchorPoint.x.toFixed(1)} cm
+          </text>
+          {/* VERTICAL LINE*/}
+          <line
+            x1={0}
+            x2={currGroup.anchorPoint.x}
+            y1={currGroup.anchorPoint.y}
+            y2={currGroup.anchorPoint.y}
+            stroke="black"
+            strokeDasharray="2"
+            strokeWidth={0.2}
+          />
+
+          <text
+            x={currGroup.anchorPoint.x + SOCKET_SIZE}
+            y={(currGroup.anchorPoint.y + plateHeight) / 2}
+            textAnchor="middle"
+            fontSize={3}
+            fill="red"
+          >
+            {(plateHeight - currGroup.anchorPoint.y).toFixed(1)} cm
+          </text>
+        </g>
+      )}
 
       <circle
         cx={currGroup.coordinates.x1}
