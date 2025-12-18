@@ -12,6 +12,7 @@ import {
 import { Socket } from "./../Socket/Socket.tsx";
 import { useDragNDrop } from "../../hooks/useDragNDrop.ts";
 import { useProjectContext } from "@/app/providers/context.ts";
+import { createPortal } from "react-dom";
 
 interface ISocketGroup {
   socketGroup: SocketGroupType;
@@ -19,12 +20,21 @@ interface ISocketGroup {
   plateHeight: number;
   plateWidth: number;
   allGroups: SocketGroupType[];
+  overlayNode: SVGElement | null;
 }
 
 export const SocketGroup = (props: ISocketGroup) => {
-  const { socketGroup, plateId, plateHeight, plateWidth, allGroups } = props;
+  const {
+    socketGroup,
+    plateId,
+    plateHeight,
+    plateWidth,
+    allGroups,
+    overlayNode,
+  } = props;
   const { updateSocketGroup } = useProjectContext();
   const currGroup = calculateValuesForSocketGroup(socketGroup);
+  // Drang and Drop
   const { isDragging, startDragging } = useDragNDrop({
     initialX: socketGroup.x,
     initialY: socketGroup.y,
@@ -98,10 +108,61 @@ export const SocketGroup = (props: ISocketGroup) => {
     },
   });
 
+  const guidelines = (
+    <g className="pointer-events-none">
+      {/*HORIZONTAL LINE*/}
+      <line
+        x1={currGroup.anchorPoint.x}
+        x2={currGroup.anchorPoint.x}
+        y1={plateHeight}
+        y2={currGroup.anchorPoint.y}
+        stroke="black"
+        strokeDasharray="2"
+        strokeWidth={0.2}
+      />
+      <text
+        x={currGroup.anchorPoint.x / 2}
+        y={currGroup.anchorPoint.y + SOCKET_SIZE / 2}
+        textAnchor="middle"
+        fontSize={3}
+        fill="red"
+      >
+        {currGroup.anchorPoint.x.toFixed(1)} cm
+      </text>
+      {/* VERTICAL LINE*/}
+      <line
+        x1={0}
+        x2={currGroup.anchorPoint.x}
+        y1={currGroup.anchorPoint.y}
+        y2={currGroup.anchorPoint.y}
+        stroke="black"
+        strokeDasharray="2"
+        strokeWidth={0.2}
+      />
+
+      <text
+        x={currGroup.anchorPoint.x + SOCKET_SIZE}
+        y={(currGroup.anchorPoint.y + plateHeight) / 2}
+        textAnchor="middle"
+        fontSize={3}
+        fill="red"
+      >
+        {(plateHeight - currGroup.anchorPoint.y).toFixed(1)} cm
+      </text>
+
+      <circle
+        cx={currGroup.anchorPoint.x}
+        cy={currGroup.anchorPoint.y}
+        r={0.5}
+        fill="red"
+      />
+    </g>
+  );
+
   return (
     <g
       onMouseDown={startDragging}
-      className={`${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      className={`${isDragging ? "cursor-grabbing" : "cursor-grab"} z-10`}
     >
       <rect
         x={currGroup.coordinates.x1}
@@ -128,80 +189,7 @@ export const SocketGroup = (props: ISocketGroup) => {
         return <Socket key={index} x={currX} y={currY - SOCKET_SIZE} />;
       })}
 
-      {isDragging && (
-        <g className="pointer-events-none">
-          {/*HORIZONTAL LINE*/}
-          <line
-            x1={currGroup.anchorPoint.x}
-            x2={currGroup.anchorPoint.x}
-            y1={plateHeight}
-            y2={currGroup.anchorPoint.y}
-            stroke="black"
-            strokeDasharray="2"
-            strokeWidth={0.2}
-          />
-          <text
-            x={currGroup.anchorPoint.x / 2}
-            y={currGroup.anchorPoint.y + SOCKET_SIZE / 2}
-            textAnchor="middle"
-            fontSize={3}
-            fill="red"
-          >
-            {currGroup.anchorPoint.x.toFixed(1)} cm
-          </text>
-          {/* VERTICAL LINE*/}
-          <line
-            x1={0}
-            x2={currGroup.anchorPoint.x}
-            y1={currGroup.anchorPoint.y}
-            y2={currGroup.anchorPoint.y}
-            stroke="black"
-            strokeDasharray="2"
-            strokeWidth={0.2}
-          />
-
-          <text
-            x={currGroup.anchorPoint.x + SOCKET_SIZE}
-            y={(currGroup.anchorPoint.y + plateHeight) / 2}
-            textAnchor="middle"
-            fontSize={3}
-            fill="red"
-          >
-            {(plateHeight - currGroup.anchorPoint.y).toFixed(1)} cm
-          </text>
-        </g>
-      )}
-
-      <circle
-        cx={currGroup.coordinates.x1}
-        cy={currGroup.coordinates.y1}
-        r={1}
-        fill="blue"
-      />
-      <circle
-        cx={currGroup.coordinates.x1}
-        cy={currGroup.coordinates.y2}
-        r={1}
-        fill="blue"
-      />
-      <circle
-        cx={currGroup.coordinates.x2}
-        cy={currGroup.coordinates.y1}
-        r={1}
-        fill="blue"
-      />
-      <circle
-        cx={currGroup.coordinates.x2}
-        cy={currGroup.coordinates.y2}
-        r={1}
-        fill="blue"
-      />
-      <circle
-        cx={currGroup.anchorPoint.x}
-        cy={currGroup.anchorPoint.y}
-        r={1}
-        fill="red"
-      />
+      {isDragging && overlayNode ? createPortal(guidelines, overlayNode) : null}
     </g>
   );
 };

@@ -1,5 +1,6 @@
 import type { Plate as PlateType } from "@/shared/types";
 import { SocketGroup } from "../SocketGroup/SocketGroup";
+import { useState } from "react";
 
 interface IPlate {
   plate: PlateType;
@@ -9,6 +10,8 @@ interface IPlate {
 
 export const Plate = (props: IPlate) => {
   const { plate, xPosition, maxHeight } = props;
+
+  const [overlayNode, setOverlayNode] = useState<SVGElement | null>(null);
 
   return (
     <svg
@@ -27,8 +30,11 @@ export const Plate = (props: IPlate) => {
           plateWidth={plate.width}
           plateHeight={plate.height}
           allGroups={plate.socketGroups}
+          overlayNode={overlayNode}
         />
       ))}
+      {/* Overlay for guidelines */}
+      <g ref={setOverlayNode} className="pointer-events-none" />
     </svg>
   );
 };
