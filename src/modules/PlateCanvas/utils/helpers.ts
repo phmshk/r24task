@@ -1,5 +1,5 @@
+import { SOCKET_SIZE, SOCKET_GAP } from "@/shared/constants";
 import type { SocketGroup, SocketGroupInfo } from "@/shared/types";
-import { SOCKET_GAP, SOCKET_SIZE } from "../constants";
 
 /** Function to get information about a socket group: full coordinates, group width and length
  * @param group - SocketGroup

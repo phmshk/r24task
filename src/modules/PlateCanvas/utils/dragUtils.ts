@@ -4,10 +4,7 @@ import {
   SOCKET_MARGIN_FROM_GROUP,
 } from "@/shared/constants";
 import type { SocketGroup } from "@/shared/types";
-import {
-  calculateValuesForSocketGroup,
-  checkIntersection,
-} from "@/shared/utils";
+import { calculateValuesForSocketGroup, checkIntersection } from "./helpers";
 
 interface CalculatePositionParams {
   newX: number;

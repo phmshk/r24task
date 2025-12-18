@@ -1,15 +1,18 @@
 import { PlateCanvas } from "@/modules/PlateCanvas";
+import { Sidebar } from "@/modules/Sidebar";
 
 function App() {
   return (
-    <div className="flex flex-col h-screen w-full">
-      <section className="max-w-7xl mx-auto w-full flex h-full flex-col lg:flex-row">
-        <div className="flex-2 bg-black m-8 p-8 rounded-2xl flex items-center justify-center">
+    <main className="flex h-screen w-full flex-col">
+      <section className="mx-auto flex h-full w-full max-w-7xl flex-col gap-4 lg:flex-row">
+        <div className="my-8 flex flex-3 items-center justify-center rounded-2xl bg-black p-8">
           <PlateCanvas />
         </div>
-        <div className="flex-1">Right Side With Sidebar</div>
+        <div className="my-8 flex-2">
+          <Sidebar />
+        </div>
       </section>
-    </div>
+    </main>
   );
 }
 

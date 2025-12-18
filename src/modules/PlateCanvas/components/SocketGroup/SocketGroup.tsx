@@ -1,6 +1,5 @@
 import { SOCKET_GAP, SOCKET_SIZE } from "@/shared/constants";
 import type { SocketGroup as SocketGroupType } from "@/shared/types";
-import { calculateValuesForSocketGroup } from "@/shared/utils";
 import { Socket } from "./../Socket/Socket.tsx";
 import { useDragNDrop } from "../../hooks/useDragNDrop.ts";
 import { useProjectContext } from "@/app/providers/context.ts";
@@ -8,6 +7,7 @@ import { createPortal } from "react-dom";
 import { AnchorPointGuidelnes } from "./AnchorPointGuidelines.tsx";
 import { useEffect, useState } from "react";
 import { calculateNextPosition } from "../../utils/dragUtils.ts";
+import { calculateValuesForSocketGroup } from "../../utils/helpers.ts";
 
 interface ISocketGroup {
   socketGroup: SocketGroupType;
