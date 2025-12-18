@@ -1,6 +1,7 @@
 import type { Plate as PlateType } from "@/shared/types";
 import { SocketGroup } from "../SocketGroup/SocketGroup";
 import { useState } from "react";
+import { PlateMargins } from "../PlateMargins/PlateMargins";
 
 interface IPlate {
   plate: PlateType;
@@ -12,6 +13,7 @@ export const Plate = (props: IPlate) => {
   const { plate, xPosition, maxHeight } = props;
 
   const [overlayNode, setOverlayNode] = useState<SVGElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   return (
     <svg
@@ -20,6 +22,7 @@ export const Plate = (props: IPlate) => {
       x={xPosition}
       y={maxHeight - plate.height}
       viewBox={`0 0 ${plate.width} ${plate.height}`}
+      overflow="visible"
     >
       <rect width="100%" height="100%" className="fill-white" />
       {plate.socketGroups.map((item) => (
@@ -31,10 +34,17 @@ export const Plate = (props: IPlate) => {
           plateHeight={plate.height}
           allGroups={plate.socketGroups}
           overlayNode={overlayNode}
+          onDragStateChange={setIsDragging}
         />
       ))}
       {/* Overlay for guidelines */}
-      <g ref={setOverlayNode} className="pointer-events-none" />
+      <g
+        ref={setOverlayNode}
+        className="pointer-events-none"
+        overflow="visible"
+      />
+      {/* Plate margins */}
+      {isDragging && <PlateMargins width={plate.width} height={plate.height} />}
     </svg>
   );
 };

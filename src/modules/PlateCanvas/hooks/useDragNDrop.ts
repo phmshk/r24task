@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface IUseDragNDrop {
   initialX: number;
@@ -18,48 +18,69 @@ export const useDragNDrop = ({
     originalY: number;
     scaleX: number;
     scaleY: number;
+    pointerId: number;
+    target: Element;
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const startDragging = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+  // ref for onGroupDrag so that event listeners wont be reapplied on every socket group update
+  const onGroupDragRef = useRef(onGroupDrag);
 
-    const parentPlate = (e.target as Element).closest("svg");
+  useEffect(() => {
+    onGroupDragRef.current = onGroupDrag;
+  }, [onGroupDrag]);
 
-    if (!parentPlate) {
-      console.error("No parent plate found");
-      return;
-    }
+  const startDragging = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    // get size of plate in px
-    const domRect = parentPlate.getBoundingClientRect();
+      // helps not to loose the element on quick dragging (found in the web)
+      (e.target as Element).setPointerCapture(e.pointerId);
 
-    // get size of plate in cm
-    const viewBoxWidth = parentPlate.viewBox.baseVal.width;
-    const viewBoxHeight = parentPlate.viewBox.baseVal.height;
+      const parentPlate = (e.target as Element).closest("svg");
 
-    // find scaling between px and cm
-    const scaling = {
-      x: viewBoxWidth / domRect.width,
-      y: viewBoxHeight / domRect.height,
-    };
+      if (!parentPlate) {
+        console.error("No parent plate found");
+        return;
+      }
 
-    setDragStart({
-      mouseX: e.clientX,
-      mouseY: e.clientY,
-      originalX: initialX,
-      originalY: initialY,
-      scaleX: scaling.x,
-      scaleY: scaling.y,
-    });
-    setIsDragging(true);
-  };
+      // get size of plate in px
+      const domRect = parentPlate.getBoundingClientRect();
+
+      // get size of plate in cm
+      const viewBoxWidth = parentPlate.viewBox.baseVal.width;
+      const viewBoxHeight = parentPlate.viewBox.baseVal.height;
+
+      // find scaling between px and cm
+      const scaling = {
+        x: viewBoxWidth / domRect.width,
+        y: viewBoxHeight / domRect.height,
+      };
+
+      setDragStart({
+        mouseX: e.clientX,
+        mouseY: e.clientY,
+        originalX: initialX,
+        originalY: initialY,
+        scaleX: scaling.x,
+        scaleY: scaling.y,
+        pointerId: e.pointerId,
+        target: e.target as Element,
+      });
+      setIsDragging(true);
+    },
+    [initialX, initialY],
+  );
 
   useEffect(() => {
     if (!isDragging || !dragStart) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
+      if (e.pointerId !== dragStart.pointerId) return;
+
+      e.preventDefault();
+
       // mouse position change in px
       const dPxX = e.clientX - dragStart.mouseX;
       const dPxY = e.clientY - dragStart.mouseY;
@@ -72,22 +93,26 @@ export const useDragNDrop = ({
       const newCmX = dragStart.originalX + dCmX;
       const newCmY = dragStart.originalY + dCmY;
 
-      onGroupDrag(newCmX, newCmY);
+      onGroupDragRef.current(newCmX, newCmY);
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = (e: PointerEvent) => {
+      if (e.pointerId !== dragStart.pointerId) return;
+      dragStart.target.releasePointerCapture(dragStart.pointerId);
       setIsDragging(false);
       setDragStart(null);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
     };
-  }, [isDragging, dragStart, onGroupDrag]);
+  }, [isDragging, dragStart]);
 
   return { isDragging, startDragging };
 };

@@ -1,5 +1,9 @@
 import { useProjectContext } from "@/app/providers";
-import { GAP_BETWEEN_PLATES } from "@/shared/constants";
+import {
+  GAP_BETWEEN_PLATES,
+  PLATE_SIZE_TEXT_GAP,
+  PLATE_SIZE_TEXT_HEIGHT,
+} from "@/shared/constants";
 import type { Plate } from "@/shared/types";
 import { useMemo } from "react";
 import { Plate as PlateItem } from "./components/Plate/Plate.tsx";
@@ -29,7 +33,7 @@ export const PlateCanvas = () => {
 
   return (
     <svg
-      viewBox={`0 0 ${layout.totalWidth} ${layout.maxHeight}`}
+      viewBox={`0 0 ${layout.totalWidth} ${layout.maxHeight + PLATE_SIZE_TEXT_HEIGHT + PLATE_SIZE_TEXT_GAP}`}
       className="max-h-full max-w-full drop-shadow-xl transition-all duration-300 ease-in-out"
       // guide from https://www.digitalocean.com/community/tutorials/svg-preserve-aspect-ratio
       // preserveAspectRatio will tell our image to scale to fit the viewPort and to be centered
@@ -38,12 +42,23 @@ export const PlateCanvas = () => {
       preserveAspectRatio="xMidYMid meet"
     >
       {layout.platesWithXCoordinate.map(({ plate, xPosition }) => (
-        <PlateItem
-          key={plate.id}
-          plate={plate}
-          xPosition={xPosition}
-          maxHeight={layout.maxHeight}
-        />
+        <g key={plate.id}>
+          <PlateItem
+            plate={plate}
+            xPosition={xPosition}
+            maxHeight={layout.maxHeight}
+          />
+          <text
+            x={xPosition + plate.width / 2}
+            y={layout.maxHeight + PLATE_SIZE_TEXT_GAP}
+            fill="white"
+            textAnchor="middle"
+            dominantBaseline="hanging"
+            fontSize={PLATE_SIZE_TEXT_HEIGHT}
+          >
+            {`${plate.width} x ${plate.height} cm`}
+          </text>
+        </g>
       ))}
     </svg>
   );
