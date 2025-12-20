@@ -1,6 +1,8 @@
 import { useProjectContext } from "@/app/providers";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
+import { PlateDimensions } from "./components/PlateDimensions/PlateDimensions";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 
 export const Sidebar = () => {
   const {
@@ -11,44 +13,40 @@ export const Sidebar = () => {
     toggleSocketMode,
     updateSocketGroup,
   } = useProjectContext();
+  const [selectedPlateId, setSelectedPlateId] = useState<string>(plates[0].id);
+
+  const activePlate =
+    plates.find((plate) => plate.id === selectedPlateId) || plates[0];
 
   return (
     <>
       <h1 className="text-center text-2xl font-bold">Sidebar</h1>
-      <div className="bg-card flex w-full items-center justify-between gap-2 rounded-md px-4 py-6">
-        <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-md text-xl">
-          1
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex w-full items-baseline justify-around">
-            <span className="text-md font-bold">Breite</span>{" "}
-            <span className="text-xs font-medium">20 - 300 cm</span>
+      <div className="flex w-full flex-col gap-8">
+        {plates.map((plate, index) => (
+          <div onClick={() => setSelectedPlateId(plate.id)} key={plate.id}>
+            <PlateDimensions
+              count={index + 1}
+              plate={plate}
+              isSelected={activePlate.id === plate.id}
+              onDelete={() => deletePlate(plate.id)}
+              onDimensionsChange={(width: number, height: number) =>
+                resizePlate(plate.id, width, height)
+              }
+              lastPlate={plates.length === 1}
+            />
           </div>
-          <div className="relative w-full">
-            <Input type="text" className="bg-white" />
-            <span className="text-md text-foreground absolute top-1/2 right-3 -translate-y-1/2">
-              cm
-            </span>
-          </div>
-          <span>1515 mm</span>
-        </div>
-        <div>X</div>
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex w-full items-baseline justify-around">
-            <span className="text-md font-bold">Höhe</span>{" "}
-            <span className="text-xs font-medium">30 - 128 cm</span>
-          </div>
-          <div className="relative w-full">
-            <Input type="text" className="bg-white" />
-            <span className="text-md text-foreground absolute top-1/2 right-3 -translate-y-1/2">
-              cm
-            </span>
-          </div>
-          <span>1515 mm</span>
-        </div>
-        <div className="bg-destructive/40 text-destructive flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-          {"\u2014"}
-        </div>
+        ))}
+        <Button
+          variant="outlineSuccess"
+          className="h-12 cursor-pointer text-base font-normal md:w-1/2 md:self-end"
+          onClick={() => {
+            const id = addPlate();
+            setSelectedPlateId(id);
+          }}
+        >
+          Rückwand hinzufügen
+          <Plus />
+        </Button>
       </div>
     </>
   );

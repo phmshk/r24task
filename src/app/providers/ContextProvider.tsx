@@ -12,32 +12,23 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [plates, setPlates] = useState<Plate[]>([
     {
       id: crypto.randomUUID(),
-      width: 151.5,
-      height: 36.8,
-      socketGroups: [
-        {
-          count: 3,
-          id: crypto.randomUUID(),
-          orientation: "horizontal",
-          x: 10,
-          y: 20,
-        },
-      ],
+      width: MIN_PLATE_WIDTH,
+      height: MIN_PLATE_HEIGHT,
+      socketGroups: [],
     },
   ]);
 
   const [socketModeIsOn, setSocketModeIsOn] = useState<boolean>(false);
 
-  const addPlate = () => {
-    setPlates((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        width: MIN_PLATE_WIDTH,
-        height: MIN_PLATE_HEIGHT,
-        socketGroups: [],
-      },
-    ]);
+  const addPlate = (): string => {
+    const newPlate = {
+      id: crypto.randomUUID(),
+      width: MIN_PLATE_WIDTH,
+      height: MIN_PLATE_HEIGHT,
+      socketGroups: [],
+    };
+    setPlates((prev) => [...prev, newPlate]);
+    return newPlate.id;
   };
 
   const deletePlate = (id: string) => {

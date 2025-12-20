@@ -7,7 +7,7 @@ import { createContext, useContext } from "react";
 
 interface IProjectContext {
   plates: Plate[];
-  addPlate: () => void;
+  addPlate: () => string;
   deletePlate: (id: string) => void;
   resizePlate: (id: string, newWidth: number, newHeight: number) => void;
   socketModeIsOn: boolean;
