@@ -28,15 +28,15 @@ export const PlateDimensions = (props: IPlateDimensions) => {
     : "bg-secondary text-secondary-foreground";
 
   return (
-    <div className="bg-card relative flex w-full items-center justify-between gap-4 rounded-md px-4 py-6">
-      <div
+    <div className="bg-card relative flex w-full items-center justify-between gap-2 rounded-md px-4 py-6 md:gap-4">
+      {/*<div
         className={cn(
           "border-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-md border-2 text-xl",
           countClasses,
         )}
       >
         {count}
-      </div>
+      </div>*/}
       <DimensionInput
         dimension="width"
         isSelected={isSelected}
@@ -56,7 +56,7 @@ export const PlateDimensions = (props: IPlateDimensions) => {
           onDimensionsChange(plate.width, newHeight)
         }
       />
-      {!lastPlate && (
+      {/*!lastPlate && (
         <Button
           variant="destructiveCircle"
           size="icon-sm"
@@ -65,7 +65,7 @@ export const PlateDimensions = (props: IPlateDimensions) => {
         >
           <Minus />
         </Button>
-      )}
+      )*/}
     </div>
   );
 };
