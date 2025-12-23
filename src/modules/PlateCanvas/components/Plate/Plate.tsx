@@ -3,13 +3,13 @@ import { SocketGroup } from "../SocketGroup/SocketGroup";
 import { useState } from "react";
 import { PlateMargins } from "../PlateMargins/PlateMargins";
 
-interface IPlate {
+interface PlateProps {
   plate: PlateType;
   xPosition: number;
   maxHeight: number;
 }
 
-export const Plate = (props: IPlate) => {
+export const Plate = (props: PlateProps) => {
   const { plate, xPosition, maxHeight } = props;
 
   const [overlayNode, setOverlayNode] = useState<SVGElement | null>(null);
@@ -22,7 +22,7 @@ export const Plate = (props: IPlate) => {
       x={xPosition}
       y={maxHeight - plate.height}
       viewBox={`0 0 ${plate.width} ${plate.height}`}
-      overflow="visible"
+      overflow="hidden"
     >
       <rect width="100%" height="100%" className="fill-white" />
       {plate.socketGroups.map((item) => (

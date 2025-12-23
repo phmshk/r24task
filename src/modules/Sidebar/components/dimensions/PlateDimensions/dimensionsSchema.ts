@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 
 export const dimensionSchema = (min: number, max: number, label: string) =>
   z.coerce

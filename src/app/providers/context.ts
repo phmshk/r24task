@@ -2,7 +2,7 @@
 // to show that I can work not only with libraries and immer,
 // but also with native tools and understand immutability principles
 
-import type { Plate, SocketGroup } from "@/shared/types";
+import type { Coordinates, Plate, SocketGroup } from "@/shared/types";
 import { createContext, useContext } from "react";
 
 interface IProjectContext {
@@ -17,6 +17,8 @@ interface IProjectContext {
     groupId: string,
     data: Partial<SocketGroup>,
   ) => void;
+  addSocketGroup: (plateId: string, socketPosition?: Coordinates) => void;
+  removeSocketGroup: (plateId: string, groupId: string) => void;
 }
 
 export const ProjectContext = createContext<IProjectContext | null>(null);

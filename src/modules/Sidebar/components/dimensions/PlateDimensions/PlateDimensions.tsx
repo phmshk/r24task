@@ -10,7 +10,7 @@ import { Minus, X } from "lucide-react";
 import { DimensionInput } from "./DimensionsInput";
 import { cn } from "@/shared/utils";
 
-interface IPlateDimensions {
+interface PlateDimensionsProps {
   plate: Plate;
   count: number;
   isSelected: boolean;
@@ -19,7 +19,7 @@ interface IPlateDimensions {
   onDimensionsChange: (width: number, height: number) => void;
 }
 
-export const PlateDimensions = (props: IPlateDimensions) => {
+export const PlateDimensions = (props: PlateDimensionsProps) => {
   const { plate, count, isSelected, onDelete, lastPlate, onDimensionsChange } =
     props;
 
@@ -29,14 +29,15 @@ export const PlateDimensions = (props: IPlateDimensions) => {
 
   return (
     <div className="bg-card relative flex w-full items-center justify-between gap-2 rounded-md px-4 py-6 md:gap-4">
-      {/*<div
+      <div
         className={cn(
-          "border-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-md border-2 text-xl",
+          // mobile
+          "border-primary absolute -top-2 -left-2 flex size-6 shrink-0 items-center justify-center rounded-md border-2 text-base md:static",
           countClasses,
         )}
       >
         {count}
-      </div>*/}
+      </div>
       <DimensionInput
         dimension="width"
         isSelected={isSelected}
@@ -56,16 +57,24 @@ export const PlateDimensions = (props: IPlateDimensions) => {
           onDimensionsChange(plate.width, newHeight)
         }
       />
-      {/*!lastPlate && (
+      {!lastPlate && (
         <Button
           variant="destructiveCircle"
-          size="icon-sm"
-          className="shrink-0 cursor-pointer"
-          onClick={onDelete}
+          className={cn(
+            // mobile
+            "absolute -top-2 -right-2 size-6 shrink-0 cursor-pointer md:static",
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          onFocus={(e) => {
+            e.stopPropagation();
+          }}
         >
           <Minus />
         </Button>
-      )*/}
+      )}
     </div>
   );
 };

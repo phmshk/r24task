@@ -1,11 +1,11 @@
 import type { SocketGroupInfo } from "@/shared/types";
 import { SOCKET_SIZE } from "@/shared/constants";
 
-interface IAnchorPointGuidelines {
+interface AnchorPointGuidelinesProps {
   currGroup: SocketGroupInfo;
   plateHeight: number;
 }
-export function AnchorPointGuidelnes(props: IAnchorPointGuidelines) {
+export function AnchorPointGuidelnes(props: AnchorPointGuidelinesProps) {
   const { currGroup, plateHeight } = props;
   return (
     <g className="pointer-events-none">

@@ -31,14 +31,18 @@ export const calculateNextPosition = ({
   const maxY = plateHeight - SOCKET_SIZE / 2;
 
   // set inner borders
-  const clampedX = Math.max(
+  const clampedXStr = Math.max(
     minX + SOCKET_MARGIN_FROM_EDGE,
     Math.min(newX, maxX - SOCKET_MARGIN_FROM_EDGE),
-  );
-  const clampedY = Math.max(
+  ).toFixed(1);
+
+  const clampedYStr = Math.max(
     minY + SOCKET_MARGIN_FROM_EDGE,
     Math.min(newY, maxY - SOCKET_MARGIN_FROM_EDGE),
-  );
+  ).toFixed(1);
+
+  const clampedX = Number(clampedXStr);
+  const clampedY = Number(clampedYStr);
 
   // collision checking
   const currentX = socketGroup.x;

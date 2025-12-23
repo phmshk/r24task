@@ -1,9 +1,12 @@
+export type OrientationType = "vertical" | "horizontal";
+export type CountType = 1 | 2 | 3 | 4 | 5;
+
 export interface SocketGroup {
   id: string;
-  count: 1 | 2 | 3 | 4 | 5;
+  count: CountType;
   x: number;
   y: number;
-  orientation: "vertical" | "horizontal";
+  orientation: OrientationType;
 }
 
 export interface SocketGroupInfo {

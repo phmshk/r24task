@@ -4,7 +4,7 @@ import {
   MIN_PLATE_WIDTH_FOR_SOCKET,
   MIN_PLATE_HEIGHT_FOR_SOCKET,
 } from "@/shared/constants";
-import type { Plate, SocketGroup } from "@/shared/types";
+import type { Coordinates, Plate, SocketGroup } from "@/shared/types";
 import { type ReactNode, useState } from "react";
 import { ProjectContext } from "./context";
 
@@ -12,8 +12,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [plates, setPlates] = useState<Plate[]>([
     {
       id: crypto.randomUUID(),
-      width: MIN_PLATE_WIDTH,
-      height: MIN_PLATE_HEIGHT,
+      width: 80,
+      height: 40,
       socketGroups: [],
     },
   ]);
@@ -85,8 +85,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
                   id: crypto.randomUUID(),
                   count: 1,
                   orientation: "vertical",
-                  x: item.width / 2,
-                  y: item.height / 2,
+                  x: Number((item.width / 2).toFixed(1)),
+                  y: Number((item.height / 2).toFixed(1)),
                 },
               ],
             };
@@ -98,6 +98,42 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
 
       setSocketModeIsOn(true);
     }
+  };
+
+  const addSocketGroup = (plateId: string, socketPosition?: Coordinates) => {
+    setPlates((prev) =>
+      prev.map((plate) => {
+        if (plate.id === plateId) {
+          const newGroup: SocketGroup = {
+            id: crypto.randomUUID(),
+            count: 1,
+            orientation: "vertical",
+            x: socketPosition
+              ? socketPosition.x
+              : Number((plate.width / 2).toFixed(1)),
+            y: socketPosition
+              ? socketPosition.y
+              : Number((plate.height / 2).toFixed(1)),
+          };
+          return { ...plate, socketGroups: [...plate.socketGroups, newGroup] };
+        }
+        return plate;
+      }),
+    );
+  };
+
+  const removeSocketGroup = (plateId: string, groupId: string) => {
+    setPlates((prev) =>
+      prev.map((plate) => {
+        if (plate.id === plateId) {
+          return {
+            ...plate,
+            socketGroups: plate.socketGroups.filter((g) => g.id !== groupId),
+          };
+        }
+        return plate;
+      }),
+    );
   };
 
   const updateSocketGroup = (
@@ -137,6 +173,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     resizePlate,
     toggleSocketMode,
     updateSocketGroup,
+    addSocketGroup,
+    removeSocketGroup,
   };
 
   return (

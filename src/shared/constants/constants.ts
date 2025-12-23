@@ -3,7 +3,6 @@ export const SOCKET_SIZE = 7; // each socket is 7x7 cm
 export const SOCKET_GAP = 0.2; // gap between sockets is 0.2cm
 export const SOCKET_MARGIN_FROM_EDGE = 3; // 3cm from plate edges
 export const SOCKET_MARGIN_FROM_GROUP = 2; // 4cm from another socket group, so 2cm from one and 2cm from another
-
 // PLATES
 export const MIN_PLATE_WIDTH = 20; // cm
 export const MAX_PLATE_WIDTH = 300; // cm

@@ -6,7 +6,7 @@ import {
 } from "@/shared/constants";
 import type { Plate } from "@/shared/types";
 import { useMemo } from "react";
-import { Plate as PlateItem } from "./components/Plate/Plate.tsx";
+import { Plate as PlateItem } from "./components/Plate/Plate";
 
 export const PlateCanvas = () => {
   const { plates } = useProjectContext();
@@ -32,34 +32,37 @@ export const PlateCanvas = () => {
   }, [plates]);
 
   return (
-    <svg
-      viewBox={`0 0 ${layout.totalWidth} ${layout.maxHeight + PLATE_SIZE_TEXT_HEIGHT + PLATE_SIZE_TEXT_GAP}`}
-      className="max-h-full max-w-full drop-shadow-xl transition-all duration-300 ease-in-out"
-      // guide from https://www.digitalocean.com/community/tutorials/svg-preserve-aspect-ratio
-      // preserveAspectRatio will tell our image to scale to fit the viewPort and to be centered
-      // xMidYMid - center the viewBox region within the viewPort region
-      // meet - scale our graphic until it meets the height and width of our viewPort
-      preserveAspectRatio="xMidYMid meet"
-    >
-      {layout.platesWithXCoordinate.map(({ plate, xPosition }) => (
-        <g key={plate.id}>
-          <PlateItem
-            plate={plate}
-            xPosition={xPosition}
-            maxHeight={layout.maxHeight}
-          />
-          <text
-            x={xPosition + plate.width / 2}
-            y={layout.maxHeight + PLATE_SIZE_TEXT_GAP}
-            fill="white"
-            textAnchor="middle"
-            dominantBaseline="hanging"
-            fontSize={PLATE_SIZE_TEXT_HEIGHT}
-          >
-            {`${plate.width} x ${plate.height} cm`}
-          </text>
-        </g>
-      ))}
-    </svg>
+    <div className="flex h-full w-full items-center justify-center p-8 md:p-12">
+      <svg
+        viewBox={`0 0 ${layout.totalWidth} ${layout.maxHeight + PLATE_SIZE_TEXT_HEIGHT + PLATE_SIZE_TEXT_GAP}`}
+        className="max-h-full max-w-full"
+        // guide from https://www.digitalocean.com/community/tutorials/svg-preserve-aspect-ratio
+        // preserveAspectRatio will tell our image to scale to fit the viewPort and to be centered
+        // xMidYMid - center the viewBox region within the viewPort region
+        // meet - scale our graphic until it meets the height and width of our viewPort
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {layout.platesWithXCoordinate.map(({ plate, xPosition }) => (
+          <g key={plate.id}>
+            <PlateItem
+              plate={plate}
+              xPosition={xPosition}
+              maxHeight={layout.maxHeight}
+            />
+            <text
+              x={xPosition + plate.width / 2}
+              y={layout.maxHeight + PLATE_SIZE_TEXT_GAP}
+              fill="white"
+              textAnchor="middle"
+              dominantBaseline="hanging"
+              fontSize={PLATE_SIZE_TEXT_HEIGHT}
+              className="pointer-events-none select-none"
+            >
+              {`${plate.width} x ${plate.height} cm`}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
   );
 };

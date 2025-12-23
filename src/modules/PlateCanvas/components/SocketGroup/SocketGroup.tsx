@@ -1,15 +1,22 @@
-import { SOCKET_GAP, SOCKET_SIZE } from "@/shared/constants";
+import {
+  SOCKET_GAP,
+  SOCKET_MARGIN_FROM_GROUP,
+  SOCKET_SIZE,
+} from "@/shared/constants";
 import type { SocketGroup as SocketGroupType } from "@/shared/types";
 import { Socket } from "./../Socket/Socket.tsx";
 import { useDragNDrop } from "../../hooks/useDragNDrop.ts";
 import { useProjectContext } from "@/app/providers/context.ts";
 import { createPortal } from "react-dom";
 import { AnchorPointGuidelnes } from "./AnchorPointGuidelines.tsx";
-import { useEffect, useState } from "react";
-import { calculateNextPosition } from "../../utils/dragUtils.ts";
-import { calculateValuesForSocketGroup } from "../../utils/helpers.ts";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { calculateNextPosition } from "@/shared/utils/dragUtils.ts";
+import {
+  calculateValuesForSocketGroup,
+  checkIntersection,
+} from "@/shared/utils/helpers.ts";
 
-interface ISocketGroup {
+interface SocketGroupProps {
   socketGroup: SocketGroupType;
   plateId: string;
   plateHeight: number;
@@ -19,7 +26,7 @@ interface ISocketGroup {
   onDragStateChange: (isDragging: boolean) => void;
 }
 
-export const SocketGroup = (props: ISocketGroup) => {
+export const SocketGroup = (props: SocketGroupProps) => {
   const {
     socketGroup,
     plateId,
@@ -29,37 +36,124 @@ export const SocketGroup = (props: ISocketGroup) => {
     overlayNode,
     onDragStateChange,
   } = props;
-  const { updateSocketGroup } = useProjectContext();
-  const currGroup = calculateValuesForSocketGroup(socketGroup);
-  const [isMovementBlocked, setIsMovementBlocked] = useState(false);
 
-  // Drang and Drop
+  const { updateSocketGroup } = useProjectContext();
+
+  // local state for position while dragging
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isMovementBlocked, setIsMovementBlocked] = useState(false);
+  const [collidedGroups, setCollidedGroups] = useState<SocketGroupType[]>([]);
+
+  const lastValidPos = useRef({ x: socketGroup.x, y: socketGroup.y });
+
+  useEffect(() => {
+    lastValidPos.current = { x: socketGroup.x, y: socketGroup.y };
+  }, [socketGroup.x, socketGroup.y]);
+
+  const currentSocketGroup = useMemo(
+    () => ({
+      ...socketGroup,
+      x: socketGroup.x + dragOffset.x,
+      y: socketGroup.y + dragOffset.y,
+    }),
+    [socketGroup, dragOffset],
+  );
+
+  const currGroupCalculated = calculateValuesForSocketGroup(currentSocketGroup);
+
+  // Drag and Drop
   const { isDragging, startDragging } = useDragNDrop({
     initialX: socketGroup.x,
     initialY: socketGroup.y,
-    onGroupDrag: (newX: number, newY: number) => {
+    onDrag: (newX: number, newY: number) => {
+      const dynamicSocketGroup = {
+        ...socketGroup,
+        x: lastValidPos.current.x,
+        y: lastValidPos.current.y,
+      };
       const result = calculateNextPosition({
         newX,
         newY,
-        socketGroup,
+        socketGroup: dynamicSocketGroup,
         allGroups,
         plateWidth,
         plateHeight,
       });
 
-      // observe movement block
-      if (result.isBlocked !== isMovementBlocked) {
-        setIsMovementBlocked(result.isBlocked);
+      setIsMovementBlocked(result.isBlocked);
+
+      if (result.isBlocked) {
+        const selfRect = calculateValuesForSocketGroup({
+          ...socketGroup,
+          x: result.x,
+          y: result.y,
+        });
+
+        const hitGroup = allGroups.find((group) => {
+          if (group.id === socketGroup.id) return false;
+
+          const targetRect = calculateValuesForSocketGroup(group);
+
+          return !checkIntersection(
+            selfRect,
+            targetRect,
+            SOCKET_MARGIN_FROM_GROUP * 2,
+          );
+        });
+
+        if (hitGroup) {
+          setCollidedGroups((prev) => [...prev, hitGroup]);
+        } else {
+          setCollidedGroups([]);
+        }
+      } else {
+        setCollidedGroups([]);
+      }
+
+      // get last valid position
+      if (!result.isBlocked) {
+        lastValidPos.current = {
+          x: result.x,
+          y: result.y,
+        };
       }
 
       // no coordinates change => nothing to update
       if (result.x === socketGroup.x && result.y === socketGroup.y) return;
 
-      updateSocketGroup(plateId, socketGroup.id, { x: result.x, y: result.y });
+      setDragOffset({
+        x: result.x - socketGroup.x,
+        y: result.y - socketGroup.y,
+      });
+    },
+    onDragEnd: (newX, newY) => {
+      const dynamicSocketGroup = {
+        ...socketGroup,
+        x: lastValidPos.current.x,
+        y: lastValidPos.current.y,
+      };
+      const result = calculateNextPosition({
+        newX,
+        newY,
+        socketGroup: dynamicSocketGroup,
+        allGroups,
+        plateWidth,
+        plateHeight,
+      });
+
+      setIsMovementBlocked(false);
+      setDragOffset({ x: 0, y: 0 });
+      setCollidedGroups([]);
+
+      if (result.x !== socketGroup.x || result.y !== socketGroup.y) {
+        updateSocketGroup(plateId, socketGroup.id, {
+          x: result.x,
+          y: result.y,
+        });
+      }
     },
   });
 
-  // showing margins on dragging
   useEffect(() => {
     onDragStateChange(isDragging);
   }, [isDragging, onDragStateChange]);
@@ -79,16 +173,21 @@ export const SocketGroup = (props: ISocketGroup) => {
     };
   }, [isDragging, isMovementBlocked]);
 
+  const obstacleGroups = useMemo(() => {
+    if (!collidedGroups) return null;
+    return collidedGroups.map((group) => calculateValuesForSocketGroup(group));
+  }, [collidedGroups]);
+
   return (
     <g
       onPointerDown={startDragging}
       className={`${isDragging ? (isMovementBlocked ? "cursor-not-allowed" : "cursor-grabbing") : "cursor-grab"} touch-none select-none`}
     >
       <rect
-        x={currGroup.coordinates.x1}
-        y={currGroup.coordinates.y2}
-        width={currGroup.width}
-        height={currGroup.height}
+        x={currGroupCalculated.coordinates.x1}
+        y={currGroupCalculated.coordinates.y2}
+        width={currGroupCalculated.width}
+        height={currGroupCalculated.height}
         fill="transparent"
       />
       {Array.from({ length: socketGroup.count }).map((_, index) => {
@@ -96,26 +195,47 @@ export const SocketGroup = (props: ISocketGroup) => {
 
         const currX =
           socketGroup.orientation === "horizontal"
-            ? currGroup.coordinates.x1 + moveBy
-            : currGroup.coordinates.x1;
+            ? currGroupCalculated.coordinates.x1 + moveBy
+            : currGroupCalculated.coordinates.x1;
 
         const currY =
           socketGroup.orientation === "horizontal"
-            ? currGroup.coordinates.y1
-            : currGroup.coordinates.y1 - moveBy;
+            ? currGroupCalculated.coordinates.y1
+            : currGroupCalculated.coordinates.y1 - moveBy;
 
         return <Socket key={index} x={currX} y={currY - SOCKET_SIZE} />;
       })}
 
-      {isDragging && overlayNode
-        ? createPortal(
+      {isDragging && overlayNode ? (
+        <>
+          {createPortal(
             <AnchorPointGuidelnes
-              currGroup={currGroup}
+              currGroup={currGroupCalculated}
               plateHeight={plateHeight}
             />,
             overlayNode,
-          )
-        : null}
+          )}
+          {collidedGroups &&
+            obstacleGroups &&
+            obstacleGroups.map((rect) =>
+              createPortal(
+                <g pointerEvents="none">
+                  <rect
+                    x={rect.coordinates.x1 - SOCKET_MARGIN_FROM_GROUP * 2}
+                    y={rect.coordinates.y2 - SOCKET_MARGIN_FROM_GROUP * 2}
+                    width={rect.width + SOCKET_MARGIN_FROM_GROUP * 4}
+                    height={rect.height + SOCKET_MARGIN_FROM_GROUP * 4}
+                    fill="transparent"
+                    stroke="red"
+                    strokeWidth="0.1"
+                    strokeDasharray="1 1"
+                  />
+                </g>,
+                overlayNode,
+              ),
+            )}
+        </>
+      ) : null}
     </g>
   );
 };

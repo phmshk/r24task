@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-interface IUseDragNDrop {
+interface UseDragNDropParams {
   initialX: number;
   initialY: number;
-  onGroupDrag: (x: number, y: number) => void;
+  onDrag: (x: number, y: number) => void;
+  onDragEnd: (x: number, y: number) => void;
 }
 
 export const useDragNDrop = ({
   initialX,
   initialY,
-  onGroupDrag,
-}: IUseDragNDrop) => {
+  onDrag,
+  onDragEnd,
+}: UseDragNDropParams) => {
   const [dragStart, setDragStart] = useState<{
     mouseX: number;
     mouseY: number;
@@ -23,12 +25,13 @@ export const useDragNDrop = ({
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // ref for onGroupDrag so that event listeners wont be reapplied on every socket group update
-  const onGroupDragRef = useRef(onGroupDrag);
+  const callbacksRef = useRef({ onDrag, onDragEnd });
 
   useEffect(() => {
-    onGroupDragRef.current = onGroupDrag;
-  }, [onGroupDrag]);
+    callbacksRef.current = { onDrag, onDragEnd };
+  }, [onDrag, onDragEnd]);
+
+  const requestRef = useRef<number | null>(null);
 
   const startDragging = useCallback(
     (e: React.PointerEvent) => {
@@ -89,16 +92,41 @@ export const useDragNDrop = ({
       const dCmX = dPxX * dragStart.scaleX;
       const dCmY = dPxY * dragStart.scaleY;
 
-      // new position in cm
       const newCmX = dragStart.originalX + dCmX;
       const newCmY = dragStart.originalY + dCmY;
 
-      onGroupDragRef.current(newCmX, newCmY);
+      if (requestRef.current) return;
+
+      requestRef.current = requestAnimationFrame(() => {
+        callbacksRef.current.onDrag(newCmX, newCmY);
+        requestRef.current = null;
+      });
     };
 
     const handlePointerUp = (e: PointerEvent) => {
       if (e.pointerId !== dragStart.pointerId) return;
+
       dragStart.target.releasePointerCapture(dragStart.pointerId);
+
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+
+      // calculate position again to pass it to parent
+      // mouse position change in px
+      const dPxX = e.clientX - dragStart.mouseX;
+      const dPxY = e.clientY - dragStart.mouseY;
+
+      // px to cm
+      const dCmX = dPxX * dragStart.scaleX;
+      const dCmY = dPxY * dragStart.scaleY;
+
+      const finalX = dragStart.originalX + dCmX;
+      const finalY = dragStart.originalY + dCmY;
+
+      callbacksRef.current.onDragEnd(finalX, finalY);
+
       setIsDragging(false);
       setDragStart(null);
     };
@@ -110,7 +138,11 @@ export const useDragNDrop = ({
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
-      window.addEventListener("pointercancel", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
     };
   }, [isDragging, dragStart]);
 
