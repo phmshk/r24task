@@ -18,13 +18,13 @@ interface SocketsSectionProps {
   socketModeIsOn: boolean;
   selectedPlateId: string;
   activePlate: Plate;
-  toggleSocketMode: () => void;
+  toggleSocketMode: () => { groupId: string; plateId: string } | null;
   updateSocketGroup: (
     plateId: string,
     groupId: string,
     data: Partial<SocketGroup>,
   ) => void;
-  addSocketGroup: (plateId: string, socketPosition: Coordinates) => void;
+  addSocketGroup: (plateId: string, socketPosition: Coordinates) => string;
   removeSocketGroup: (plateId: string, groupId: string) => void;
   setSelectedPlateId: (id: string) => void;
 }
@@ -62,18 +62,23 @@ export const SocketsSection = (props: SocketsSectionProps) => {
   const activeSocketGroup = useMemo(() => {
     if (!activePlate.socketGroups.length) return undefined;
 
-    if (socketModeIsOn && activePlate.socketGroups) {
-      console.log(activePlate.socketGroups);
-    }
-
     return activePlate.socketGroups.find(
       (group) => group.id === selectedSocketGroupId,
     );
-  }, [activePlate.socketGroups, selectedSocketGroupId, socketModeIsOn]);
+  }, [activePlate.socketGroups, selectedSocketGroupId]);
 
   const handleAddSocketGroup = () => {
     if (canAddSocketsToSelected) {
-      addSocketGroup(activePlate.id, canAddSocketsToSelected);
+      const id = addSocketGroup(activePlate.id, canAddSocketsToSelected);
+      if (id) setSelectedSocketGroupId(id);
+    }
+  };
+
+  const handleToggleSocketMode = () => {
+    const result = toggleSocketMode();
+    if (result) {
+      setSelectedPlateId(result.plateId);
+      setSelectedSocketGroupId(result.groupId);
     }
   };
 
@@ -85,9 +90,9 @@ export const SocketsSection = (props: SocketsSectionProps) => {
       <div className="border-muted flex items-center justify-between rounded-md border-2 px-2 py-4">
         <Label htmlFor="add-sockets">Ausschnitte für Steckdosen angeben?</Label>
         <Switch
-          disabled={!canAddSocketsToAny}
+          disabled={!socketModeIsOn && !canAddSocketsToAny}
           checked={socketModeIsOn}
-          onCheckedChange={toggleSocketMode}
+          onCheckedChange={handleToggleSocketMode}
           className="cursor-pointer data-[state=checked]:bg-green-500"
           id="add-sockets"
         />
@@ -104,41 +109,62 @@ export const SocketsSection = (props: SocketsSectionProps) => {
           </div>
         </div>
       )}
-      {socketModeIsOn && (
+      {socketModeIsOn && canAddSocketsToAny && (
         <div className="space-y-6">
           <PlatesSelection
             activePlate={activePlate}
             plates={plates}
             setSelectedPlateId={setSelectedPlateId}
           />
-          {activeSocketGroup ? (
-            <div>
-              <SocketsSelection
-                plate={activePlate}
-                updateSocketGroup={updateSocketGroup}
-                activeSocketGroup={activeSocketGroup}
-              />
 
-              <SocketsPositioning
-                plate={activePlate}
-                updateSocketGroup={(data) =>
-                  updateSocketGroup(activePlate.id, activeSocketGroup.id, data)
+          {canAddSocketsToSelected ? (
+            activeSocketGroup ? (
+              <div>
+                <SocketsSelection
+                  plate={activePlate}
+                  updateSocketGroup={updateSocketGroup}
+                  activeSocketGroup={activeSocketGroup}
+                />
+
+                <SocketsPositioning
+                  plate={activePlate}
+                  updateSocketGroup={(data) =>
+                    updateSocketGroup(
+                      activePlate.id,
+                      activeSocketGroup.id,
+                      data,
+                    )
+                  }
+                  activeSocketGroup={activeSocketGroup}
+                  onAddSocket={() => setSelectedSocketGroupId(null)}
+                />
+              </div>
+            ) : (
+              <SocketsListView
+                socketGroups={activePlate.socketGroups}
+                onEdit={setSelectedSocketGroupId}
+                onAdd={handleAddSocketGroup}
+                onDelete={(groupId: string) =>
+                  removeSocketGroup(activePlate.id, groupId)
                 }
-                activeSocketGroup={activeSocketGroup}
-                onAddSocket={() => setSelectedSocketGroupId(null)}
+                canAddMore={!!canAddSocketsToSelected}
+                onSelect={(groupId: string) =>
+                  setSelectedSocketGroupId(groupId)
+                }
               />
-            </div>
+            )
           ) : (
-            <SocketsListView
-              socketGroups={activePlate.socketGroups}
-              onEdit={setSelectedSocketGroupId}
-              onAdd={handleAddSocketGroup}
-              onDelete={(groupId: string) =>
-                removeSocketGroup(activePlate.id, groupId)
-              }
-              canAddMore={!!canAddSocketsToSelected}
-              onSelect={(groupId: string) => setSelectedSocketGroupId(groupId)}
-            />
+            <div className="border-destructive text-destructive flex items-start gap-2 rounded-md border px-2 py-4">
+              <Info className="size-6" />
+              <div>
+                <h3>Hinweis</h3>
+                <p>
+                  Für diese Maße sind keine Auschnitte möglich. Das Mindestmaß
+                  für Steckdosen beträgt 40x40cm. Bitte ändere die Maße
+                  entsprechend.
+                </p>
+              </div>
+            </div>
           )}
         </div>
       )}

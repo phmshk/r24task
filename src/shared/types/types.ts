@@ -1,5 +1,6 @@
 export type OrientationType = "vertical" | "horizontal";
 export type CountType = 1 | 2 | 3 | 4 | 5;
+export type ActiveStep = "dimensions" | "sockets";
 
 export interface SocketGroup {
   id: string;

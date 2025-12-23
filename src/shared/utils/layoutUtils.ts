@@ -1,4 +1,6 @@
 import {
+  MIN_PLATE_HEIGHT_FOR_SOCKET,
+  MIN_PLATE_WIDTH_FOR_SOCKET,
   SOCKET_MARGIN_FROM_EDGE,
   SOCKET_MARGIN_FROM_GROUP,
 } from "@/shared/constants";
@@ -60,6 +62,12 @@ export const findNextAvailablePosition = (
   size: 1 | 2 | 3 | 4 | 5,
   orientation: "horizontal" | "vertical",
 ): { x: number; y: number } | null => {
+  if (
+    plate.width < MIN_PLATE_WIDTH_FOR_SOCKET ||
+    plate.height < MIN_PLATE_HEIGHT_FOR_SOCKET
+  )
+    return null;
+
   const step = 0.5;
   const tempGroup: SocketGroup = {
     id: "temp",

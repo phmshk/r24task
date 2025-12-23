@@ -4,7 +4,12 @@ import {
   MIN_PLATE_WIDTH_FOR_SOCKET,
   MIN_PLATE_HEIGHT_FOR_SOCKET,
 } from "@/shared/constants";
-import type { Coordinates, Plate, SocketGroup } from "@/shared/types";
+import {
+  type ActiveStep,
+  type Coordinates,
+  type Plate,
+  type SocketGroup,
+} from "@/shared/types";
 import { type ReactNode, useState } from "react";
 import { ProjectContext } from "./context";
 
@@ -19,6 +24,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   const [socketModeIsOn, setSocketModeIsOn] = useState<boolean>(false);
+  const [activeStep, setActiveStep] = useState<ActiveStep>("dimensions");
+  const [selectedPlateId, setSelectedPlateId] = useState<string>(plates[0].id);
 
   const addPlate = (): string => {
     const newPlate = {
@@ -63,10 +70,14 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
         prev.map((item: Plate): Plate => ({ ...item, socketGroups: [] })),
       );
       setSocketModeIsOn(false);
+      return null;
     } else {
       // else place one socketGroup in the middle of the first plate
       // with proper sizes and turn on
       // if no such plate was found just return all plates
+      const newSocketGroupId = crypto.randomUUID();
+      let plateIdWithNewSocket = "";
+
       setPlates((prev) => {
         const targetIndex = prev.findIndex(
           (plate: Plate) =>
@@ -78,11 +89,12 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
 
         return prev.map((item: Plate, index: number): Plate => {
           if (index === targetIndex) {
+            plateIdWithNewSocket = item.id;
             return {
               ...item,
               socketGroups: [
                 {
-                  id: crypto.randomUUID(),
+                  id: newSocketGroupId,
                   count: 1,
                   orientation: "vertical",
                   x: Number((item.width / 2).toFixed(1)),
@@ -97,15 +109,21 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
       });
 
       setSocketModeIsOn(true);
+
+      if (plateIdWithNewSocket) {
+        return { groupId: newSocketGroupId, plateId: plateIdWithNewSocket };
+      }
+      return null;
     }
   };
 
   const addSocketGroup = (plateId: string, socketPosition?: Coordinates) => {
+    const socketId = crypto.randomUUID();
     setPlates((prev) =>
       prev.map((plate) => {
         if (plate.id === plateId) {
           const newGroup: SocketGroup = {
-            id: crypto.randomUUID(),
+            id: socketId,
             count: 1,
             orientation: "vertical",
             x: socketPosition
@@ -120,6 +138,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
         return plate;
       }),
     );
+
+    return socketId;
   };
 
   const removeSocketGroup = (plateId: string, groupId: string) => {
@@ -168,6 +188,10 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const contextValue = {
     plates,
     socketModeIsOn,
+    activeStep,
+    selectedPlateId,
+    setSelectedPlateId,
+    setActiveStep,
     addPlate,
     deletePlate,
     resizePlate,

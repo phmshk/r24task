@@ -1,5 +1,5 @@
 import { useProjectContext } from "@/app/providers";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { DimensionsSelection } from "./components/dimensions/DimensionsSelection";
 import { SocketsSection } from "./components/sockets/SocketsSection";
 import { useIntersectionObserver } from "@/shared/utils";
@@ -11,13 +11,15 @@ export const Sidebar = () => {
     deletePlate,
     socketModeIsOn,
     plates,
+    selectedPlateId,
+    setSelectedPlateId,
     resizePlate,
     toggleSocketMode,
     updateSocketGroup,
     addSocketGroup,
     removeSocketGroup,
+    setActiveStep,
   } = useProjectContext();
-  const [selectedPlateId, setSelectedPlateId] = useState<string>(plates[0].id);
 
   const activePlate =
     plates.find((plate) => plate.id === selectedPlateId) || plates[0];
@@ -49,6 +51,14 @@ export const Sidebar = () => {
     sections,
     observerOptions,
   );
+
+  useEffect(() => {
+    if (activeId === "section-sockets") {
+      setActiveStep("sockets");
+    } else {
+      setActiveStep("dimensions");
+    }
+  }, [activeId, setActiveStep]);
 
   const handleScroll = (
     id: string,
