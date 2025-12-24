@@ -85,7 +85,7 @@ export const SocketsSection = (props: SocketsSectionProps) => {
 
   return (
     <div className="flex min-h-150 w-full flex-col gap-8">
-      <h2 className="text-2xl font-normal">
+      <h2 className="text-center text-2xl font-normal lg:text-start">
         <span className="font-bold">Steckdosen.</span> Auswählen.
       </h2>
       <div className="border-muted flex items-center justify-between rounded-md border-2 px-2 py-4">

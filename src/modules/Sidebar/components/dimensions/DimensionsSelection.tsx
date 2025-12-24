@@ -23,7 +23,7 @@ export const DimensionsSelection = (props: DimensionsSelectionProps) => {
   } = props;
   return (
     <div className="flex w-full flex-col gap-8">
-      <h2 className="text-2xl font-normal">
+      <h2 className="text-center text-2xl font-normal lg:text-start">
         <span className="font-bold">Maße.</span> Eingeben.
       </h2>
       {plates.map((plate, index) => (

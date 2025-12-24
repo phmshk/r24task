@@ -1,115 +1,15 @@
-import { useProjectContext } from "@/app/providers";
-import { useEffect, useMemo, useRef } from "react";
-import { DimensionsSelection } from "./components/dimensions/DimensionsSelection";
-import { SocketsSection } from "./components/sockets/SocketsSection";
-import { useIntersectionObserver } from "@/shared/utils";
-import { SidebarStep } from "./components/step/SidebarStep";
+import { useBreakpoint } from "@/shared/utils/hooks/useBreakpoint";
+import { SidebarDesktop } from "./components/step/SidebarDesktop";
+import { SidebarMobile } from "./components/step/SidebarMobile";
+import { useSidebarSteps } from "./components/step/useSidebarSteps";
 
 export const Sidebar = () => {
-  const {
-    addPlate,
-    deletePlate,
-    socketModeIsOn,
-    plates,
-    selectedPlateId,
-    setSelectedPlateId,
-    resizePlate,
-    toggleSocketMode,
-    updateSocketGroup,
-    addSocketGroup,
-    removeSocketGroup,
-    setActiveStep,
-    selectedSocketGroupId,
-    setSelectedSocketGroupId,
-  } = useProjectContext();
+  const isMobile = useBreakpoint();
+  const steps = useSidebarSteps();
 
-  const activePlate =
-    plates.find((plate) => plate.id === selectedPlateId) || plates[0];
+  if (isMobile) {
+    return <SidebarMobile steps={steps} />;
+  }
 
-  const dimensionsRef = useRef<HTMLDivElement>(null);
-  const socketsRef = useRef<HTMLDivElement>(null);
-
-  const sections = useMemo(
-    () => [
-      { id: "section-dimensions", ref: dimensionsRef },
-      { id: "section-sockets", ref: socketsRef },
-    ],
-    [],
-  );
-
-  const observerOptions = useMemo(
-    () => ({
-      //active area of the scrol
-      //top 20% of the screen is ignored so that the top element is disabled when it moves to the top
-      //bottom 35% of the screen is ignored so that the bottom element is activated only when it moves higher
-      rootMargin: "-20% 0px -35% 0px",
-      //element is visible if at least 10% is visible
-      threshold: 0.4,
-    }),
-    [],
-  );
-
-  const { activeId, setActiveId } = useIntersectionObserver(
-    sections,
-    observerOptions,
-  );
-
-  useEffect(() => {
-    if (activeId === "section-sockets") {
-      setActiveStep("sockets");
-    } else {
-      setActiveStep("dimensions");
-    }
-  }, [activeId, setActiveStep]);
-
-  const handleScroll = (
-    id: string,
-    ref: React.RefObject<HTMLDivElement | null>,
-  ) => {
-    setActiveId(id);
-    ref.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  return (
-    <div className="flex min-h-1/3 flex-col gap-4">
-      <div ref={dimensionsRef} id="section-dimensions">
-        <SidebarStep
-          isActive={activeId === "section-dimensions"}
-          onClick={() => handleScroll("section-dimensions", dimensionsRef)}
-          count={1}
-        >
-          <DimensionsSelection
-            addPlate={addPlate}
-            deletePlate={deletePlate}
-            resizePlate={resizePlate}
-            activePlate={activePlate}
-            plates={plates}
-            setSelectedPlateId={setSelectedPlateId}
-          />
-        </SidebarStep>
-      </div>
-      <div ref={socketsRef} id="section-sockets">
-        <SidebarStep
-          isActive={activeId === "section-sockets"}
-          isLast
-          onClick={() => handleScroll("section-sockets", socketsRef)}
-          count={2}
-        >
-          <SocketsSection
-            plates={plates}
-            socketModeIsOn={socketModeIsOn}
-            toggleSocketMode={toggleSocketMode}
-            updateSocketGroup={updateSocketGroup}
-            selectedPlateId={selectedPlateId}
-            setSelectedPlateId={setSelectedPlateId}
-            activePlate={activePlate}
-            addSocketGroup={addSocketGroup}
-            removeSocketGroup={removeSocketGroup}
-            selectedSocketGroupId={selectedSocketGroupId}
-            setSelectedSocketGroupId={setSelectedSocketGroupId}
-          />
-        </SidebarStep>
-      </div>
-    </div>
-  );
+  return <SidebarDesktop steps={steps} />;
 };
