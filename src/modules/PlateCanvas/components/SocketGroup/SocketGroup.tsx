@@ -15,6 +15,7 @@ import {
   calculateValuesForSocketGroup,
   checkIntersection,
 } from "@/shared/utils/helpers.ts";
+import { cn } from "@/shared/utils/index.ts";
 
 interface SocketGroupProps {
   socketGroup: SocketGroupType;
@@ -23,6 +24,7 @@ interface SocketGroupProps {
   plateWidth: number;
   allGroups: SocketGroupType[];
   overlayNode: SVGElement | null;
+  selectedSocketGroupId: string | null;
   onDragStateChange: (isDragging: boolean) => void;
 }
 
@@ -34,6 +36,7 @@ export const SocketGroup = (props: SocketGroupProps) => {
     plateWidth,
     allGroups,
     overlayNode,
+    selectedSocketGroupId,
     onDragStateChange,
   } = props;
 
@@ -181,15 +184,20 @@ export const SocketGroup = (props: SocketGroupProps) => {
   return (
     <g
       onPointerDown={startDragging}
-      className={`${isDragging ? (isMovementBlocked ? "cursor-not-allowed" : "cursor-grabbing") : "cursor-grab"} touch-none select-none`}
+      className={cn(
+        "touch-none select-none",
+        isDragging
+          ? isMovementBlocked
+            ? "cursor-not-allowed"
+            : "cursor-grabbing"
+          : "cursor-grab",
+        selectedSocketGroupId
+          ? socketGroup.id === selectedSocketGroupId
+            ? "opacity-100"
+            : "opacity-35"
+          : "opacity-100",
+      )}
     >
-      <rect
-        x={currGroupCalculated.coordinates.x1}
-        y={currGroupCalculated.coordinates.y2}
-        width={currGroupCalculated.width}
-        height={currGroupCalculated.height}
-        fill="transparent"
-      />
       {Array.from({ length: socketGroup.count }).map((_, index) => {
         const moveBy = index * (SOCKET_SIZE + SOCKET_GAP);
 
@@ -219,7 +227,7 @@ export const SocketGroup = (props: SocketGroupProps) => {
             obstacleGroups &&
             obstacleGroups.map((rect) =>
               createPortal(
-                <g pointerEvents="none">
+                <g pointerEvents="none" className="touch-none">
                   <rect
                     x={rect.coordinates.x1 - SOCKET_MARGIN_FROM_GROUP * 2}
                     y={rect.coordinates.y2 - SOCKET_MARGIN_FROM_GROUP * 2}
@@ -229,6 +237,7 @@ export const SocketGroup = (props: SocketGroupProps) => {
                     stroke="red"
                     strokeWidth="0.1"
                     strokeDasharray="1 1"
+                    className="touch-none"
                   />
                 </g>,
                 overlayNode,
@@ -236,6 +245,15 @@ export const SocketGroup = (props: SocketGroupProps) => {
             )}
         </>
       ) : null}
+
+      <rect
+        x={currGroupCalculated.coordinates.x1}
+        y={currGroupCalculated.coordinates.y2}
+        width={currGroupCalculated.width}
+        height={currGroupCalculated.height}
+        fill="transparent"
+        className="touch-none"
+      />
     </g>
   );
 };

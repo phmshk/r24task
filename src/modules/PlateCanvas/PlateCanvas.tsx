@@ -4,12 +4,13 @@ import {
   PLATE_SIZE_TEXT_GAP,
   PLATE_SIZE_TEXT_HEIGHT,
 } from "@/shared/constants";
-import type { Plate } from "@/shared/types";
+import type { Plate as PlateType } from "@/shared/types";
 import { useMemo } from "react";
-import { Plate as PlateItem } from "./components/Plate/Plate";
+import { Plate } from "./components/Plate/Plate";
 
 export const PlateCanvas = () => {
-  const { plates, activeStep, selectedPlateId } = useProjectContext();
+  const { plates, activeStep, selectedPlateId, selectedSocketGroupId } =
+    useProjectContext();
 
   const activePlate = useMemo(
     () => plates.find((p) => p.id === selectedPlateId) || plates[0],
@@ -20,9 +21,10 @@ export const PlateCanvas = () => {
     if (activeStep === "dimensions") {
       let totalWidth = 0;
       let maxHeight = 0;
-      const platesWithXCoordinate: { plate: Plate; xPosition: number }[] = [];
+      const platesWithXCoordinate: { plate: PlateType; xPosition: number }[] =
+        [];
 
-      plates.forEach((plate: Plate) => {
+      plates.forEach((plate: PlateType) => {
         platesWithXCoordinate.push({ plate, xPosition: totalWidth });
         totalWidth += plate.width + GAP_BETWEEN_PLATES;
         maxHeight = maxHeight > plate.height ? maxHeight : plate.height;
@@ -53,7 +55,7 @@ export const PlateCanvas = () => {
       <svg
         //viewBox={`0 0 ${layout.totalWidth} ${layout.maxHeight + PLATE_SIZE_TEXT_HEIGHT + PLATE_SIZE_TEXT_GAP}`}
         viewBox={layout.viewBox}
-        className="max-h-full max-w-full"
+        className="max-h-full max-w-full touch-none"
         // guide from https://www.digitalocean.com/community/tutorials/svg-preserve-aspect-ratio
         // preserveAspectRatio will tell our image to scale to fit the viewPort and to be centered
         // xMidYMid - center the viewBox region within the viewPort region
@@ -61,11 +63,12 @@ export const PlateCanvas = () => {
         preserveAspectRatio="xMidYMid meet"
       >
         {layout.visiblePlates.map(({ plate, xPosition }) => (
-          <g key={plate.id}>
-            <PlateItem
+          <g key={plate.id} className="touch-none">
+            <Plate
               plate={plate}
               xPosition={xPosition}
               maxHeight={layout.maxHeight}
+              selectedSocketGroupId={selectedSocketGroupId}
             />
             <text
               x={xPosition + plate.width / 2}

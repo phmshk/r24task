@@ -14,6 +14,8 @@ interface IProjectContext {
   plates: Plate[];
   activeStep: ActiveStep;
   selectedPlateId: string;
+  selectedSocketGroupId: string | null;
+  setSelectedSocketGroupId: (id: string | null) => void;
   setSelectedPlateId: (id: string) => void;
   setActiveStep: (step: ActiveStep) => void;
   addPlate: () => string;

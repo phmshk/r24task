@@ -26,6 +26,9 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [socketModeIsOn, setSocketModeIsOn] = useState<boolean>(false);
   const [activeStep, setActiveStep] = useState<ActiveStep>("dimensions");
   const [selectedPlateId, setSelectedPlateId] = useState<string>(plates[0].id);
+  const [selectedSocketGroupId, setSelectedSocketGroupId] = useState<
+    string | null
+  >(null);
 
   const addPlate = (): string => {
     const newPlate = {
@@ -190,6 +193,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     socketModeIsOn,
     activeStep,
     selectedPlateId,
+    selectedSocketGroupId,
+    setSelectedSocketGroupId,
     setSelectedPlateId,
     setActiveStep,
     addPlate,

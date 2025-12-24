@@ -7,10 +7,11 @@ interface PlateProps {
   plate: PlateType;
   xPosition: number;
   maxHeight: number;
+  selectedSocketGroupId: string | null;
 }
 
 export const Plate = (props: PlateProps) => {
-  const { plate, xPosition, maxHeight } = props;
+  const { plate, xPosition, maxHeight, selectedSocketGroupId } = props;
 
   const [overlayNode, setOverlayNode] = useState<SVGElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -24,7 +25,7 @@ export const Plate = (props: PlateProps) => {
       viewBox={`0 0 ${plate.width} ${plate.height}`}
       overflow="hidden"
     >
-      <rect width="100%" height="100%" className="fill-white" />
+      <rect width="100%" height="100%" className="touch-none fill-white" />
       {plate.socketGroups.map((item) => (
         <SocketGroup
           key={item.id}
@@ -35,12 +36,13 @@ export const Plate = (props: PlateProps) => {
           allGroups={plate.socketGroups}
           overlayNode={overlayNode}
           onDragStateChange={setIsDragging}
+          selectedSocketGroupId={selectedSocketGroupId}
         />
       ))}
       {/* Overlay for guidelines */}
       <g
         ref={setOverlayNode}
-        className="pointer-events-none"
+        className="pointer-events-none touch-none"
         overflow="visible"
       />
       {/* Plate margins */}

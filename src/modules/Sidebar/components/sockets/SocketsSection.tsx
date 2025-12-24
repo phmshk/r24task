@@ -1,7 +1,7 @@
 import { Label } from "@/shared/components/ui/label";
 import type { Coordinates, Plate, SocketGroup } from "@/shared/types";
 import { Switch } from "@/shared/components/ui/switch";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   MIN_PLATE_HEIGHT_FOR_SOCKET,
   MIN_PLATE_WIDTH_FOR_SOCKET,
@@ -18,6 +18,8 @@ interface SocketsSectionProps {
   socketModeIsOn: boolean;
   selectedPlateId: string;
   activePlate: Plate;
+  selectedSocketGroupId: string | null;
+  setSelectedSocketGroupId: (id: string | null) => void;
   toggleSocketMode: () => { groupId: string; plateId: string } | null;
   updateSocketGroup: (
     plateId: string,
@@ -39,10 +41,9 @@ export const SocketsSection = (props: SocketsSectionProps) => {
     socketModeIsOn,
     setSelectedPlateId,
     activePlate,
+    selectedSocketGroupId,
+    setSelectedSocketGroupId,
   } = props;
-  const [selectedSocketGroupId, setSelectedSocketGroupId] = useState<
-    string | null
-  >(null);
 
   const canAddSocketsToAny = useMemo(
     () =>

@@ -14,7 +14,7 @@ export const Socket = (props: SocketProps) => {
       y={y}
       width={SOCKET_SIZE}
       height={SOCKET_SIZE}
-      className="fill-green-400"
+      className="touch-none fill-green-400"
     />
   );
 };

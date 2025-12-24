@@ -19,6 +19,8 @@ export const Sidebar = () => {
     addSocketGroup,
     removeSocketGroup,
     setActiveStep,
+    selectedSocketGroupId,
+    setSelectedSocketGroupId,
   } = useProjectContext();
 
   const activePlate =
@@ -103,6 +105,8 @@ export const Sidebar = () => {
             activePlate={activePlate}
             addSocketGroup={addSocketGroup}
             removeSocketGroup={removeSocketGroup}
+            selectedSocketGroupId={selectedSocketGroupId}
+            setSelectedSocketGroupId={setSelectedSocketGroupId}
           />
         </SidebarStep>
       </div>
