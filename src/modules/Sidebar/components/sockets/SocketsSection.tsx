@@ -84,7 +84,7 @@ export const SocketsSection = (props: SocketsSectionProps) => {
   };
 
   return (
-    <div className="flex min-h-150 w-full flex-col gap-8">
+    <div className="flex min-h-92 w-full flex-col gap-8">
       <h2 className="text-center text-2xl font-normal lg:text-start">
         <span className="font-bold">Steckdosen.</span> Auswählen.
       </h2>
@@ -152,6 +152,7 @@ export const SocketsSection = (props: SocketsSectionProps) => {
                 onSelect={(groupId: string) =>
                   setSelectedSocketGroupId(groupId)
                 }
+                plate={activePlate}
               />
             )
           ) : (

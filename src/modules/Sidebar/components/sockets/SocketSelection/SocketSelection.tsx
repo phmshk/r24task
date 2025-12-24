@@ -66,7 +66,7 @@ export const SocketsSelection = (props: SocketsSelectionProps) => {
   const orientationItems = ["Horizontal", "Vertikal"];
 
   return (
-    <div className="space-y-4">
+    <div className="min-h-1/2 space-y-4">
       <h3 className="text-xl font-bold">
         Bestimme Anzahl und Ausrichtung der Steckdosen
       </h3>

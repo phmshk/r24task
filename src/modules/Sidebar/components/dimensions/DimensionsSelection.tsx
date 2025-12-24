@@ -48,7 +48,8 @@ export const DimensionsSelection = (props: DimensionsSelectionProps) => {
       <Button
         variant="outlineSuccess"
         className="flex h-12 w-fit cursor-pointer items-center text-base font-normal md:self-end"
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           const id = addPlate();
           setSelectedPlateId(id);
         }}

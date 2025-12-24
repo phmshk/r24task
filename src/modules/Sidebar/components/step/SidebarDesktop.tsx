@@ -21,9 +21,11 @@ export const SidebarDesktop = ({ steps }: SidebarDesktopProps) => {
       //active area of the scrol
       //top 20% of the screen is ignored so that the top element is disabled when it moves to the top
       //bottom 35% of the screen is ignored so that the bottom element is activated only when it moves higher
-      rootMargin: "-20% 0px -35% 0px",
-      //element is visible if at least 10% is visible
-      threshold: 0.4,
+      //rootMargin: "-20% 0px -35% 0px",
+      //element is visible if at least 1px is visible
+      //threshold: 0,
+      rootMargin: "-45% 0px -55% 0px",
+      threshold: [0, 0.1, 0.2, 0.3, 0.4],
     }),
     [],
   );
@@ -49,7 +51,7 @@ export const SidebarDesktop = ({ steps }: SidebarDesktopProps) => {
   };
 
   return (
-    <div className="flex min-h-1/3 flex-col gap-4">
+    <div className="flex min-h-screen flex-col gap-4">
       {steps.map((step, index) => (
         <div key={step.id} ref={step.ref} id={step.id}>
           <SidebarStep

@@ -1,5 +1,5 @@
 import { Button } from "@/shared/components/ui/button";
-import type { SocketGroup } from "@/shared/types";
+import type { Plate, SocketGroup } from "@/shared/types";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -16,6 +16,7 @@ interface SocketsListProps {
   onAdd: () => void;
   onSelect: (groupId: string) => void;
   canAddMore: boolean;
+  plate: Plate;
 }
 
 const formatter = new Intl.NumberFormat("de-DE", {
@@ -24,7 +25,8 @@ const formatter = new Intl.NumberFormat("de-DE", {
 });
 
 export const SocketsListView = (props: SocketsListProps) => {
-  const { socketGroups, onEdit, onDelete, onAdd, canAddMore, onSelect } = props;
+  const { socketGroups, onEdit, onDelete, onAdd, canAddMore, onSelect, plate } =
+    props;
 
   const handleSelect = (
     groupId: string,
@@ -45,7 +47,9 @@ export const SocketsListView = (props: SocketsListProps) => {
             onClick={(e) => handleSelect(group.id, e)}
           >
             <div className="flex items-center gap-2 text-sm font-bold">
-              <span>1. Rückwand - 80 x 40</span>
+              <span>
+                1. Rückwand - {plate.width} x {plate.height}
+              </span>
               <span className="text-muted-foreground font-normal">|</span>
               <span>
                 {group.count}x Steckdose{" "}

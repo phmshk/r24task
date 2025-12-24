@@ -9,7 +9,7 @@ export function useIntersectionObserver(
   items: ObserverItem[],
   options: IntersectionObserverInit,
 ) {
-  const [activeId, setActiveId] = useState<string>(items[0].id);
+  const [activeId, setActiveId] = useState<string>(items[0].id || "");
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {

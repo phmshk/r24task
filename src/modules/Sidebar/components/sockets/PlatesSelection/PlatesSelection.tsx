@@ -10,11 +10,11 @@ interface PlatesSelectionProps {
 export const PlatesSelection = (props: PlatesSelectionProps) => {
   const { plates, setSelectedPlateId, activePlate } = props;
   return (
-    <div className="space-y-4">
+    <div className="min-h-1/2 space-y-4">
       <h3 className="text-xl font-bold">
         Wähle die Rückwand für die Steckdose
       </h3>
-      <div className="bg-card flex gap-2 overflow-x-scroll rounded-md p-2 pb-4">
+      <div className="bg-card flex max-w-full gap-2 overflow-x-auto rounded-md p-2 pb-4">
         {plates.map((plate) => (
           <div className="flex flex-col items-center" key={plate.id}>
             {/*Outer div for plate*/}
