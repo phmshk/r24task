@@ -1,86 +1,72 @@
-import { useProjectContext } from "@/app/providers";
-import {
-  GAP_BETWEEN_PLATES,
-  PLATE_SIZE_TEXT_GAP,
-  PLATE_SIZE_TEXT_HEIGHT,
-} from "@/shared/constants";
-import type { Plate as PlateType } from "@/shared/types";
 import { useMemo } from "react";
+import { useProjectContext } from "@/app/providers";
 import { Plate } from "./components/Plate/Plate";
+import { useCanvasLayout } from "./hooks/useCanvasLayout";
+import { CanvasNavigation } from "./components/Canvas/CanvasNavigation/CanvasNavigation";
+import { DimensionLabel } from "./components/Canvas/DimensionsLabel/DimensionsLabel";
 
 export const PlateCanvas = () => {
-  const { plates, activeStep, selectedPlateId, selectedSocketGroupId } =
-    useProjectContext();
+  const {
+    plates,
+    activeStep,
+    selectedPlateId,
+    selectedSocketGroupId,
+    setSelectedPlateId,
+  } = useProjectContext();
 
   const activePlate = useMemo(
     () => plates.find((p) => p.id === selectedPlateId) || plates[0],
     [plates, selectedPlateId],
   );
 
-  const layout = useMemo(() => {
-    if (activeStep === "dimensions") {
-      let totalWidth = 0;
-      let maxHeight = 0;
-      const platesWithXCoordinate: { plate: PlateType; xPosition: number }[] =
-        [];
+  const layout = useCanvasLayout({ plates, activeStep, activePlate });
 
-      plates.forEach((plate: PlateType) => {
-        platesWithXCoordinate.push({ plate, xPosition: totalWidth });
-        totalWidth += plate.width + GAP_BETWEEN_PLATES;
-        maxHeight = maxHeight > plate.height ? maxHeight : plate.height;
-      });
+  const currentPlateIndex = plates.findIndex((p) => p.id === activePlate.id);
+  const showNavigation = activeStep !== "dimensions" && plates.length > 1;
+  const showDimensions = activeStep !== "dimensions";
 
-      totalWidth = totalWidth > 0 ? totalWidth - GAP_BETWEEN_PLATES : 0;
+  const handlePrevPlate = () => {
+    const prevIndex = currentPlateIndex - 1;
+    if (prevIndex >= 0) setSelectedPlateId(plates[prevIndex].id);
+  };
 
-      return {
-        totalWidth,
-        maxHeight,
-        platesWithXCoordinate,
-
-        visiblePlates: platesWithXCoordinate, // Переименовал для ясности
-        viewBox: `0 0 ${totalWidth} ${maxHeight + PLATE_SIZE_TEXT_HEIGHT + PLATE_SIZE_TEXT_GAP}`,
-      };
-    } else {
-      return {
-        totalWidth: activePlate.width,
-        maxHeight: activePlate.height,
-        visiblePlates: [{ plate: activePlate, xPosition: 0 }],
-        viewBox: `0 0 ${activePlate.width} ${activePlate.height + PLATE_SIZE_TEXT_HEIGHT + PLATE_SIZE_TEXT_GAP}`,
-      };
-    }
-  }, [plates, activePlate, activeStep]);
+  const handleNextPlate = () => {
+    const nextIndex = currentPlateIndex + 1;
+    if (nextIndex < plates.length) setSelectedPlateId(plates[nextIndex].id);
+  };
 
   return (
-    <div className="flex h-full w-full items-center justify-center p-8 md:p-12">
+    <div className="relative flex h-full w-full items-center justify-center p-8 md:p-12">
+      {showNavigation && (
+        <CanvasNavigation
+          onPrev={handlePrevPlate}
+          onNext={handleNextPlate}
+          canPrev={currentPlateIndex > 0}
+          canNext={currentPlateIndex < plates.length - 1}
+        />
+      )}
+
       <svg
-        //viewBox={`0 0 ${layout.totalWidth} ${layout.maxHeight + PLATE_SIZE_TEXT_HEIGHT + PLATE_SIZE_TEXT_GAP}`}
         viewBox={layout.viewBox}
-        className="max-h-full max-w-full touch-none"
-        // guide from https://www.digitalocean.com/community/tutorials/svg-preserve-aspect-ratio
-        // preserveAspectRatio will tell our image to scale to fit the viewPort and to be centered
-        // xMidYMid - center the viewBox region within the viewPort region
-        // meet - scale our graphic until it meets the height and width of our viewPort
+        className="max-h-full max-w-full touch-none overflow-visible"
         preserveAspectRatio="xMidYMid meet"
       >
         {layout.visiblePlates.map(({ plate, xPosition }) => (
-          <g key={plate.id} className="touch-none">
+          <g key={plate.id} className="touch-none overflow-visible">
             <Plate
               plate={plate}
               xPosition={xPosition}
               maxHeight={layout.maxHeight}
               selectedSocketGroupId={selectedSocketGroupId}
             />
-            <text
-              x={xPosition + plate.width / 2}
-              y={layout.maxHeight + PLATE_SIZE_TEXT_GAP}
-              fill="white"
-              textAnchor="middle"
-              dominantBaseline="hanging"
-              fontSize={PLATE_SIZE_TEXT_HEIGHT}
-              className="pointer-events-none select-none"
-            >
-              {`${plate.width} x ${plate.height} cm`}
-            </text>
+            {showDimensions && (
+              <DimensionLabel
+                x={xPosition + plate.width / 2}
+                yBase={layout.maxHeight}
+                width={plate.width}
+                height={plate.height}
+              />
+            )}
           </g>
         ))}
       </svg>

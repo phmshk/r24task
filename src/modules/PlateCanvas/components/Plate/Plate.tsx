@@ -23,7 +23,7 @@ export const Plate = (props: PlateProps) => {
       x={xPosition}
       y={maxHeight - plate.height}
       viewBox={`0 0 ${plate.width} ${plate.height}`}
-      overflow="hidden"
+      className="overflow-visible"
     >
       <rect width="100%" height="100%" className="touch-none fill-white" />
       {plate.socketGroups.map((item) => (
@@ -40,11 +40,7 @@ export const Plate = (props: PlateProps) => {
         />
       ))}
       {/* Overlay for guidelines */}
-      <g
-        ref={setOverlayNode}
-        className="pointer-events-none touch-none"
-        overflow="visible"
-      />
+      <g ref={setOverlayNode} className="pointer-events-none touch-none" />
       {/* Plate margins */}
       {isDragging && <PlateMargins width={plate.width} height={plate.height} />}
     </svg>

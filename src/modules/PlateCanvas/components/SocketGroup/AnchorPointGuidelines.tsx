@@ -1,5 +1,5 @@
 import type { SocketGroupInfo } from "@/shared/types";
-import { SOCKET_SIZE } from "@/shared/constants";
+import { PLATE_SIZE_TEXT_HEIGHT, SOCKET_SIZE } from "@/shared/constants";
 
 interface AnchorPointGuidelinesProps {
   currGroup: SocketGroupInfo;
@@ -23,7 +23,7 @@ export function AnchorPointGuidelnes(props: AnchorPointGuidelinesProps) {
         x={currGroup.anchorPoint.x / 2}
         y={currGroup.anchorPoint.y + SOCKET_SIZE / 2}
         textAnchor="middle"
-        fontSize={3}
+        fontSize={PLATE_SIZE_TEXT_HEIGHT}
         fill="red"
       >
         {currGroup.anchorPoint.x.toFixed(1)} cm
@@ -43,7 +43,7 @@ export function AnchorPointGuidelnes(props: AnchorPointGuidelinesProps) {
         x={currGroup.anchorPoint.x + SOCKET_SIZE}
         y={(currGroup.anchorPoint.y + plateHeight) / 2}
         textAnchor="middle"
-        fontSize={3}
+        fontSize={PLATE_SIZE_TEXT_HEIGHT}
         fill="red"
       >
         {(plateHeight - currGroup.anchorPoint.y).toFixed(1)} cm

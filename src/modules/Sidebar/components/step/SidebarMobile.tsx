@@ -22,7 +22,7 @@ export const SidebarMobile = ({ steps }: SidebarMobileProps) => {
   };
 
   return (
-    <div className="relative flex min-h-[50vh] flex-col gap-4 pb-24">
+    <div className="relative flex flex-col gap-4">
       <MobileSteps
         currentStep={safeIndex + 1}
         totalSteps={steps.length}

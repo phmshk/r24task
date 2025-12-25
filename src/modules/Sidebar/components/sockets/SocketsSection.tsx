@@ -55,7 +55,7 @@ export const SocketsSection = (props: SocketsSectionProps) => {
     [plates],
   );
 
-  const canAddSocketsToSelected = useMemo(
+  const nextAvailablePosition = useMemo(
     () => findNextAvailablePosition(activePlate, 1, "horizontal"),
     [activePlate],
   );
@@ -69,8 +69,8 @@ export const SocketsSection = (props: SocketsSectionProps) => {
   }, [activePlate.socketGroups, selectedSocketGroupId]);
 
   const handleAddSocketGroup = () => {
-    if (canAddSocketsToSelected) {
-      const id = addSocketGroup(activePlate.id, canAddSocketsToSelected);
+    if (nextAvailablePosition) {
+      const id = addSocketGroup(activePlate.id, nextAvailablePosition);
       if (id) setSelectedSocketGroupId(id);
     }
   };
@@ -83,8 +83,13 @@ export const SocketsSection = (props: SocketsSectionProps) => {
     }
   };
 
+  const handleSelectSocketGroup = (groupId: string, plateId: string) => {
+    setSelectedPlateId(plateId);
+    setSelectedSocketGroupId(groupId);
+  };
+
   return (
-    <div className="flex min-h-92 w-full flex-col gap-8">
+    <div className="flex w-full flex-col gap-8 lg:min-h-92">
       <h2 className="text-center text-2xl font-normal lg:text-start">
         <span className="font-bold">Steckdosen.</span> Auswählen.
       </h2>
@@ -112,61 +117,40 @@ export const SocketsSection = (props: SocketsSectionProps) => {
       )}
       {socketModeIsOn && canAddSocketsToAny && (
         <div className="space-y-6">
-          <PlatesSelection
-            activePlate={activePlate}
-            plates={plates}
-            setSelectedPlateId={setSelectedPlateId}
-          />
-
-          {canAddSocketsToSelected ? (
-            activeSocketGroup ? (
-              <div>
-                <SocketsSelection
-                  plate={activePlate}
-                  updateSocketGroup={updateSocketGroup}
-                  activeSocketGroup={activeSocketGroup}
-                />
-
-                <SocketsPositioning
-                  plate={activePlate}
-                  updateSocketGroup={(data) =>
-                    updateSocketGroup(
-                      activePlate.id,
-                      activeSocketGroup.id,
-                      data,
-                    )
-                  }
-                  activeSocketGroup={activeSocketGroup}
-                  onAddSocket={() => setSelectedSocketGroupId(null)}
-                />
-              </div>
-            ) : (
-              <SocketsListView
-                socketGroups={activePlate.socketGroups}
-                onEdit={setSelectedSocketGroupId}
-                onAdd={handleAddSocketGroup}
-                onDelete={(groupId: string) =>
-                  removeSocketGroup(activePlate.id, groupId)
-                }
-                canAddMore={!!canAddSocketsToSelected}
-                onSelect={(groupId: string) =>
-                  setSelectedSocketGroupId(groupId)
-                }
-                plate={activePlate}
+          {activeSocketGroup ? (
+            <div>
+              <PlatesSelection
+                activePlate={activePlate}
+                plates={plates}
+                setSelectedPlateId={setSelectedPlateId}
               />
-            )
-          ) : (
-            <div className="border-destructive text-destructive flex items-start gap-2 rounded-md border px-2 py-4">
-              <Info className="size-6" />
-              <div>
-                <h3>Hinweis</h3>
-                <p>
-                  Für diese Maße sind keine Auschnitte möglich. Das Mindestmaß
-                  für Steckdosen beträgt 40x40cm. Bitte ändere die Maße
-                  entsprechend.
-                </p>
-              </div>
+
+              <SocketsSelection
+                plate={activePlate}
+                updateSocketGroup={updateSocketGroup}
+                activeSocketGroup={activeSocketGroup}
+              />
+
+              <SocketsPositioning
+                plate={activePlate}
+                updateSocketGroup={(data) =>
+                  updateSocketGroup(activePlate.id, activeSocketGroup.id, data)
+                }
+                activeSocketGroup={activeSocketGroup}
+                onAddSocket={() => setSelectedSocketGroupId(null)}
+              />
             </div>
+          ) : (
+            <SocketsListView
+              onEdit={handleSelectSocketGroup}
+              onAdd={handleAddSocketGroup}
+              onDelete={(groupId: string, plateId: string) =>
+                removeSocketGroup(plateId, groupId)
+              }
+              canAddMore={!!nextAvailablePosition}
+              onSelect={handleSelectSocketGroup}
+              plates={plates}
+            />
           )}
         </div>
       )}

@@ -1,5 +1,5 @@
 import { Button } from "@/shared/components/ui/button";
-import type { Plate, SocketGroup } from "@/shared/types";
+import type { Plate } from "@/shared/types";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -10,13 +10,12 @@ import { Trash2, Pencil, MoreVertical, Info } from "lucide-react";
 import type { MouseEvent } from "react";
 
 interface SocketsListProps {
-  socketGroups: SocketGroup[];
-  onEdit: (groupId: string) => void;
-  onDelete: (groupId: string) => void;
+  onSelect: (groupId: string, plateId: string) => void;
+  onEdit: (groupId: string, plateId: string) => void;
+  onDelete: (groupId: string, plateId: string) => void;
   onAdd: () => void;
-  onSelect: (groupId: string) => void;
   canAddMore: boolean;
-  plate: Plate;
+  plates: Plate[];
 }
 
 const formatter = new Intl.NumberFormat("de-DE", {
@@ -25,72 +24,79 @@ const formatter = new Intl.NumberFormat("de-DE", {
 });
 
 export const SocketsListView = (props: SocketsListProps) => {
-  const { socketGroups, onEdit, onDelete, onAdd, canAddMore, onSelect, plate } =
-    props;
+  const { onEdit, onDelete, onAdd, canAddMore, onSelect, plates } = props;
 
   const handleSelect = (
     groupId: string,
+    plateId: string,
     e: MouseEvent<HTMLDivElement | HTMLButtonElement>,
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    onSelect(groupId);
+    console.log(123);
+    onSelect(groupId, plateId);
   };
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        {socketGroups.map((group) => (
-          <div
-            aria-label="Socket group selection and info about particular socket group"
-            key={group.id}
-            className="border-muted flex cursor-pointer items-center justify-between rounded-md border-2 p-2"
-            onClick={(e) => handleSelect(group.id, e)}
-          >
-            <div className="flex items-center gap-2 text-sm font-bold">
-              <span>
-                1. Rückwand - {plate.width} x {plate.height}
-              </span>
-              <span className="text-muted-foreground font-normal">|</span>
-              <span>
-                {group.count}x Steckdose{" "}
-                <span className="text-muted-foreground">
-                  + {formatter.format(group.count * 20)}
-                </span>
-              </span>
-            </div>
+        {plates.map((plate, index) =>
+          plate.socketGroups.map((group) => (
+            <div
+              aria-label="Socket group selection and info about particular socket group"
+              key={group.id}
+              className="border-muted flex cursor-pointer items-center justify-between rounded-md border-2 p-2"
+              onClick={(e) => handleSelect(group.id, plate.id, e)}
+            >
+              <div className="text-sm font-bold hover:underline md:text-sm">
+                <div>
+                  <span>
+                    {index + 1}. Rückwand - {plate.width} x {plate.height}
+                  </span>
+                  <span className="text-muted-foreground mx-2 font-normal">
+                    |
+                  </span>
+                  <span>
+                    {group.count}x Steckdose{" "}
+                    <span className="text-muted-foreground">
+                      + {formatter.format(group.count * 20)}
+                    </span>
+                  </span>
+                </div>
+              </div>
 
-            <div onClick={(e) => e.stopPropagation()}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 cursor-pointer"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">Menü öffnen</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => onEdit(group.id)}
-                  >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Bearbeiten
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onDelete(group.id)}
-                    className="text-destructive focus:text-destructive cursor-pointer"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Löschen
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div onClick={(e) => e.stopPropagation()}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 cursor-pointer"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Menü öffnen</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => onEdit(group.id, plate.id)}
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Bearbeiten
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDelete(group.id, plate.id)}
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Löschen
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-          </div>
-        ))}
+          )),
+        )}
       </div>
       {!canAddMore && (
         <div className="flex items-start gap-2 rounded-md border border-yellow-600 px-2 py-4 text-yellow-600">

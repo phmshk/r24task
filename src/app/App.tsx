@@ -9,7 +9,7 @@ function App() {
           <PlateCanvas />
         </div>
 
-        <div className="mb-40 w-full min-w-0 px-2 py-4">
+        <div className="w-full min-w-0 px-2 py-4 lg:mb-40">
           <Sidebar />
         </div>
       </section>
