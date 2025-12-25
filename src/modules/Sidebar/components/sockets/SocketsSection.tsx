@@ -123,6 +123,7 @@ export const SocketsSection = (props: SocketsSectionProps) => {
                 activePlate={activePlate}
                 plates={plates}
                 setSelectedPlateId={setSelectedPlateId}
+                isDisabled={!!activeSocketGroup}
               />
 
               <SocketsSelection

@@ -33,7 +33,6 @@ export const SocketsListView = (props: SocketsListProps) => {
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log(123);
     onSelect(groupId, plateId);
   };
   return (
